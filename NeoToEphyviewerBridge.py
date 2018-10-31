@@ -56,7 +56,7 @@ def NeoSegmentToEphyviewerSources(neo_seg):
     '''
 
     sources = {'signal': [], 'epoch': [], 'event': [], 'spike': []}
-    
+
     sources['signal'].append(NeoAnalogSignalToInMemoryAnalogSignalSource(neo_seg.analogsignals))
     # sources['epoch'] .append(NeoEpochToInMemoryEpochSource(neo_seg.epochs))
     sources['epoch'] .append(ephyviewer.NeoEpochSource(neo_seg.epochs))

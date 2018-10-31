@@ -318,7 +318,7 @@ def ApplyFilters(metadata, blk):
         signalNameToAxoGraphIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
 
         for sig_filter in metadata['filters']:
-    
+
             index = signalNameToAxoGraphIndex.get(sig_filter['channel'], None)
             if index is None:
 
