@@ -218,7 +218,7 @@ def PlotExampleWithEphyviewer(sources, xsize = 60):
     app = ephyviewer.mkQApp()
 
     # create a window
-    win = ephyviewer.MainViewer()
+    win = ephyviewer.MainViewer(global_xsize_zoom = True)
 
     # create viewers for each data source
     for i, signal_source in enumerate(sources['signal']):
