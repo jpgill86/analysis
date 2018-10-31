@@ -15,7 +15,7 @@ dependencies:
   - scikit-learn=0.19.2 # workaround for tridesclous
   - pip:
     - git+https://github.com/NeuralEnsemble/python-neo.git@master
-    - git+https://github.com/jpgill86/ephyviewer.git@experimental/latest
+    - git+https://github.com/jpgill86/ephyviewer.git@experimental
     - git+https://github.com/tridesclous/tridesclous.git@master
     - axographio
     - elephant
