@@ -9,6 +9,34 @@ import quantities as pq
 import neo
 import elephant
 
+def NeoAnalogSignalDerivative(sig):
+    '''
+    Calculate the derivative of a Neo AnalogSignal
+
+    Parameters:
+        sig (neo.AnalogSignal)
+            The signal to differentiate. If sig contains more than one channel,
+            each is differentiated separately.
+
+    Returns:
+        neo.AnalogSignal
+            The returned object is an AnalogSignal containing the differences
+            between each successive sample value of the input signal divided by
+            the sampling period. The output signal will have the same number of
+            channels as the input signal.
+    '''
+
+    if not isinstance(sig, neo.AnalogSignal):
+        raise TypeError('sig must be an AnalogSignal: {}'.format(sig))
+
+    derivative_sig = neo.AnalogSignal(
+        np.diff(sig.as_quantity(), axis=0) / sig.sampling_period,
+        t_start = sig.t_start,
+        sampling_period = sig.sampling_period,
+    )
+
+    return derivative_sig
+
 def NeoAnalogSignalRAUC(sig, bin_duration = None, baseline = None, t_start = None, t_stop = None):
     '''
     Calculate the rectified area under the curve (RAUC) for a Neo AnalogSignal
@@ -100,7 +128,7 @@ def NeoAnalogSignalRAUC(sig, bin_duration = None, baseline = None, t_start = Non
         rauc_sig = neo.AnalogSignal(
             rauc,
             t_start = sig.t_start.rescale('s') + bin_duration/2,
-            sampling_period = bin_duration
+            sampling_period = bin_duration,
         )
         return rauc_sig
 
