@@ -13,6 +13,7 @@ dependencies:
   - pyyaml
   - quantities
   - scikit-learn=0.19.2 # workaround for tridesclous
+  - seaborn
   - statsmodels
   - pip:
     - git+https://github.com/NeuralEnsemble/python-neo.git@master
@@ -20,4 +21,5 @@ dependencies:
     - git+https://github.com/tridesclous/tridesclous.git@master
     - axographio
     - elephant
+    - pylttb
     - spm1d
