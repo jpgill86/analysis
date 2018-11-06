@@ -178,22 +178,32 @@ class MetadataSelector(ipywidgets.Select):
         '''
         return self.all_metadata[self.value]
 
-    def __getitem__(self, key):
+    def __getitem__(self, *args):
         '''
-        Compact method for indexing into the selected metadata set's dictionary.
+        Pass-through method for using __getitem__ on the selected metadata set.
         '''
-        return self.selected_metadata[key]
+        return self.selected_metadata.__getitem__(*args)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, *args):
         '''
-        Compact method for setting items in the selected metadata set's
-        dictionary.
+        Pass-through method for using __setitem__ on the selected metadata set.
         '''
-        self.selected_metadata[key] = value
+        return self.selected_metadata.__setitem__(*args)
 
-    def __delitem__(self, key):
+    def __delitem__(self, *args):
         '''
-        Compact method for deleting items in the selected metadata set's
-        dictionary.
+        Pass-through method for using __delitem__ on the selected metadata set.
         '''
-        del self.selected_metadata[key]
+        return self.selected_metadata.__delitem__(*args)
+
+    def get(self, *args):
+        '''
+        Pass-through method for using get() on the selected metadata set.
+        '''
+        return self.selected_metadata.get(*args)
+
+    def setdefault(self, *args):
+        '''
+        Pass-through method for using setdefault() on the selected metadata set.
+        '''
+        return self.selected_metadata.setdefault(*args)
