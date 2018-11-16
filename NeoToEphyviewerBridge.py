@@ -78,12 +78,20 @@ def NeoAnalogSignalToInMemoryAnalogSignalSource(neo_analogsignals):
         ephyviewer.InMemoryAnalogSignalSource
     '''
 
-    sig_source = ephyviewer.InMemoryAnalogSignalSource(
-        signals = np.concatenate([sig.magnitude for sig in neo_analogsignals], axis = 1),
-        sample_rate = neo_analogsignals[0].sampling_rate.rescale('Hz').magnitude, # assuming all AnalogSignals have the same sampling rate
-        t_start = neo_analogsignals[0].t_start.rescale('s').magnitude,            # assuming all AnalogSignals start at the same time
-        channel_names = np.array([sig.name for sig in neo_analogsignals]),
-    )
+    if neo_analogsignals:
+        sig_source = ephyviewer.InMemoryAnalogSignalSource(
+            signals = np.concatenate([sig.magnitude for sig in neo_analogsignals], axis = 1),
+            sample_rate = neo_analogsignals[0].sampling_rate.rescale('Hz').magnitude, # assuming all AnalogSignals have the same sampling rate
+            t_start = neo_analogsignals[0].t_start.rescale('s').magnitude,            # assuming all AnalogSignals start at the same time
+            channel_names = np.array([sig.name for sig in neo_analogsignals]),
+        )
+    else:
+        sig_source = ephyviewer.InMemoryAnalogSignalSource(
+            signals = np.array([[]]),
+            sample_rate = 1,
+            t_start = 0,
+            channel_names = np.array([]),
+        )
 
     return sig_source
 
