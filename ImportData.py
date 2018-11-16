@@ -58,7 +58,7 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
         if fake_data_for_testing:
             blk.segments[0].spiketrains += [fake_neo('SpikeTrain', seed=42), fake_neo('SpikeTrain', seed=42)]
 
-    return blk
+    return blk, annotations_dataframe, epoch_encoder_dataframe, spikes_dataframe
 
 def ReadDataFile(metadata):
     '''
