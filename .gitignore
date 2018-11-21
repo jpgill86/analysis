@@ -2,7 +2,6 @@
 *.yml
 ffs-ignore/
 scratch/
-NeoToEphyviewerBridge_WithGroupSplitting.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
