@@ -47,7 +47,7 @@ Running the ephyviewer example
 Launch the ``Ephyviewer.ipynb`` notebook located in the ``example`` directory.
 Run all cells in order. A Qt-based graphical user interface will launch.
 (Note that this type of GUI cannot be launched from a Jupyter server running on
-a remote computer, such as with MyBinder.org).
+a remote computer, such as with MyBinder.org.)
 
 .. image:: example/ephyviewer-screenshot.png
 
@@ -70,37 +70,7 @@ __ http://ephyviewer.readthedocs.io
 Notes
 -----
 
-Notebook kernel bugs
-~~~~~~~~~~~~~~~~~~~~
-
-Preface: If you use ``environment.yml`` to create your conda environment or
-force ipykernel to an older version manually, you shouldn't need to worry about
-these bugs.
-
-As of 2018-10-28, with ipykernel>=5.0.0, the Python kernel may fail to start
-when launching a Jupyter notebook. If when opening the notebook you see the
-error "Failed to start the kernel. FileNotFoundError: [WinError 2] The system
-cannot find the file specified", it may be caused by a bad path to the Python
-executable in a configuration file name ``kernel.json`` (see related discussion
-`here`__; this bug appears to affect Windows installations only). You can locate
-the config file using ::
-
-    jupyter kernelspec list
-
-One solution is to manually correct the path to the Python executable within the
-config file (remove ``/bin``). Another is to delete the kernel configuration
-entirely and fall back on the default kernel configuration, which can be done
-easily from the command line::
-
-    jupyter kernelspec remove python3
-
-A third, heavy-handed solution is used in ``environment.yml``, which pins
-ipykernel to an older version, both to avoid this bug and to work around an
-unrelated but coincident issue with tridesclous in which the kernel fails to
-recognize that a GUI window has been closed and becomes unresponsive.
-
-As was stated above, if you use ``environment.yml`` or force ipykernel to an
-older version manually, you should be fine. Alternatively, you could choose to
-live in the future after these bugs have been fixed.
-
-__ https://github.com/conda-forge/ipykernel-feedstock/issues/6
+As of 2018-11-29, with ipykernel>=5.0.0 (versions 5.0.0 and 5.1.0 tested), there
+is a compatibility issue with tridesclous in which the kernel sometimes fails to
+recognize that a GUI window has been closed and becomes unresponsive. To work
+around this, ipykernel is pinned to an older version in ``environment.yml``.

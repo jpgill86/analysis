@@ -3,7 +3,7 @@ channels:
   - defaults
 dependencies:
   - av
-  - ipykernel=4.10.0    # workaround for tridesclous and kernel.json bug
+  - ipykernel=4.10.0 # workaround for tridesclous bug
   - ipywidgets
   - matplotlib
   - notebook
@@ -12,14 +12,13 @@ dependencies:
   - python>=3
   - pyyaml
   - quantities
-  - scikit-learn=0.19.2 # workaround for tridesclous
   - seaborn
   - statsmodels
   - pip:
-    - git+https://github.com/NeuralEnsemble/python-neo.git@master
-    - git+https://github.com/jpgill86/ephyviewer.git@experimental
-    - git+https://github.com/tridesclous/tridesclous.git@master
-    - axographio
-    - elephant
+    - axographio>=0.3.1
+    - neo>=0.7.0
     - pylttb
     - spm1d
+    - git+https://github.com/jpgill86/ephyviewer.git@experimental
+    - git+https://github.com/jpgill86/elephant.git@neo-0.7.0-compatibility
+    - git+https://github.com/tridesclous/tridesclous.git@master
