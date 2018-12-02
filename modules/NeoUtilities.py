@@ -22,7 +22,8 @@ def NeoAnalogSignalDerivative(sig):
         neo.AnalogSignal
             The returned object is an AnalogSignal containing the differences
             between each successive sample value of the input signal divided by
-            the sampling period. The output signal will have the same number of
+            the sampling period. Times are centered between the successive
+            samples of the input. The output signal will have the same number of
             channels as the input signal.
     '''
 
@@ -31,7 +32,7 @@ def NeoAnalogSignalDerivative(sig):
 
     derivative_sig = neo.AnalogSignal(
         np.diff(sig.as_quantity(), axis=0) / sig.sampling_period,
-        t_start = sig.t_start,
+        t_start = sig.t_start + sig.sampling_period / 2,
         sampling_period = sig.sampling_period,
     )
 
