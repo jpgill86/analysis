@@ -31,8 +31,8 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
         blk.segments[0].events += CreateNeoEventsFromDataframe(annotations_dataframe, metadata, metadata['annotations_file'])
     else:
         if fake_data_for_testing:
-            blk.segments[0].epochs += [fake_neo('Epoch', seed=42), fake_neo('Epoch', seed=42)]
-            blk.segments[0].events += [fake_neo('Event', seed=42), fake_neo('Event', seed=42)]
+            blk.segments[0].epochs += [fake_neo('Epoch') for _ in range(5)]
+            blk.segments[0].events += [fake_neo('Event') for _ in range(5)]
 
     # read in epoch encoder file
     epoch_encoder_dataframe = ReadEpochEncoderFile(metadata)
@@ -56,7 +56,7 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
     else:
         # otherwise load fake data as a demo
         if fake_data_for_testing:
-            blk.segments[0].spiketrains += [fake_neo('SpikeTrain', seed=42), fake_neo('SpikeTrain', seed=42)]
+            blk.segments[0].spiketrains += [fake_neo('SpikeTrain') for _ in range(5)]
 
     return blk, annotations_dataframe, epoch_encoder_dataframe, spikes_dataframe
 
