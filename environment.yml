@@ -20,5 +20,5 @@ dependencies:
     - pylttb
     - spm1d
     - git+https://github.com/jpgill86/ephyviewer.git@experimental
-    - git+https://github.com/jpgill86/elephant.git@neo-0.7.0-compatibility
+    - git+https://github.com/jpgill86/elephant.git@experimental
     - git+https://github.com/tridesclous/tridesclous.git@master
