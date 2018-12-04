@@ -17,14 +17,14 @@ or update an existing one::
 
     conda env update -f environment.yml -n <envname>
 
-You may use ``environment-XXXX-XX-XX.yml`` instead to create an exact replica of
-an environment created from ``environment.yml`` from a particular date (these
-files were created using ``conda env export``, with git commands pointing to
-specific commits added manually). This is useful for tracking down bugs or
-reproducing old results exactly when external package updates create unexpected
-changes in output. Using old environment snapshots may result in installing old
-versions of packages when newer versions would work just as well, so try
-``environment.yml`` first.
+You may use ``snapshots/environment-XXXX-XX-XX.yml`` instead to create an exact
+replica of an environment created from ``environment.yml`` from a particular
+date (these files were created using ``conda env export``, with git commands
+pointing to specific commits added manually). This is useful for tracking down
+bugs or reproducing old results exactly when external package updates create
+unexpected changes in output. Using old environment snapshots may result in
+installing old versions of packages when newer versions would work just as well,
+so try ``environment.yml`` first.
 
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://conda.io/miniconda.html
