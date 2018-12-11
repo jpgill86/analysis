@@ -9,11 +9,19 @@ You will need access to these commands on the command line:
 - ``conda`` (Anaconda_ or Miniconda_ with Python 3)
 - ``git`` (git-scm.com_)
 
+Download this source code, either manually through GitHub_ or using ``git``::
+
+    git clone https://github.com/jpgill86/analysis.git
+
+On the command line, navigate to the top-level directory::
+
+    cd analysis
+
 Create a new conda environment::
 
     conda env create -f environment.yml -n <envname>
 
-or update an existing one::
+where ``<envname>`` can be anything you like, or update an existing one::
 
     conda env update -f environment.yml -n <envname>
 
@@ -29,6 +37,7 @@ so try ``environment.yml`` first.
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://conda.io/miniconda.html
 .. _git-scm.com:    https://git-scm.com/downloads
+.. _GitHub:         https://github.com/jpgill86/analysis/
 
 Getting started
 ---------------
