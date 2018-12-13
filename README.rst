@@ -9,7 +9,7 @@ You will need access to these commands on the command line:
 - ``conda`` (Anaconda_ or Miniconda_ with Python 3)
 - ``git`` (git-scm.com_)
 
-Download this source code, either manually through GitHub_ or using ``git``::
+Download this source code::
 
     git clone https://github.com/jpgill86/analysis.git
 
@@ -37,7 +37,6 @@ so try ``environment.yml`` first.
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://conda.io/miniconda.html
 .. _git-scm.com:    https://git-scm.com/downloads
-.. _GitHub:         https://github.com/jpgill86/analysis/
 
 Getting started
 ---------------
