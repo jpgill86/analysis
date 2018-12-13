@@ -81,7 +81,8 @@ def LoadMetadata(file = 'metadata.yml', data_root_dir = '..'):
     '''
 
     # load metadata from file
-    md = yaml.safe_load(open(file))
+    with open(file) as f:
+        md = yaml.safe_load(f)
 
     # fill in missing metadata with default values
     for key in md:
