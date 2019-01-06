@@ -33,9 +33,6 @@ example dataset:
     - name: B3 (50-100 uV)
       channel: BN2
       amplitude: [50, 100]
-    # - name: '? (45-50 uV)'
-    #   channel: BN2
-    #   amplitude: [45, 50]
     - name: B6/B9 ? (26-45 uV)
       channel: BN2
       amplitude: [26, 45]
@@ -43,35 +40,9 @@ example dataset:
       channel: BN2
       amplitude: [17, 26]
       epoch: B38
-    # - name: '? (15-17 uV)'
-    #   channel: BN2
-    #   amplitude: [15, 17]
-    # - name: B43 ? (10-15 uV)
-    #   channel: BN2
-    #   amplitude: [10, 15]
-    # - name: B10 ? (5-10 uV)
-    #   channel: BN2
-    #   amplitude: [5, 10]
     - name: B4/B5
       channel: BN3
       amplitude: [75, 150]
-  # tridesclous_file: '2018-06-21_IN-VIVO_JG-08 002 SPIKES-WAY-TOO-MANY.csv'
-  # tridesclous_merge: [[0, 1]]
-  # tridesclous_channels:
-  #   0: [BN3]
-  #   1: [BN3]
-  #   2: [BN3]
-  #   3: [BN3]
-  #   4: [BN3]
-  #   5: [BN3]
-  #   6: [BN3]
-  #   7: [BN3]
-  #   8: [BN3]
-  #   9: [BN3]
-  #   10: [BN3]
-  #   11: [BN3]
-  #   12: [BN3]
-  #   13: [BN3]
   filters:
   - channel: I2
     lowpass: 100
@@ -88,15 +59,3 @@ example dataset:
     ylim: [-150, 150]
   - channel: Force
     ylim: [-10, 300]
-  # - channel: I2 RAUC
-  #   units: uV*s
-  #   ylim: [0, 4]
-  # - channel: RN RAUC
-  #   units: uV*s
-  #   ylim: [0, 0.5]
-  # - channel: BN2 RAUC
-  #   units: uV*s
-  #   ylim: [0, 1.2]
-  # - channel: BN3 RAUC
-  #   units: uV*s
-  #   ylim: [0, 2]
