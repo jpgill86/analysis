@@ -8,9 +8,8 @@ You will need access to these commands on the command line:
 
 - ``conda`` (Anaconda_ or Miniconda_ with Python 3)
 - ``git`` (git-scm.com_)
-- ``git lfs`` (git-lfs.github.com_)
 
-Download this source code::
+Download this source code, either manually through GitHub_ or using ``git``::
 
     git clone https://github.com/jpgill86/analysis.git
 
@@ -35,10 +34,10 @@ unexpected changes in output. Using old environment snapshots may result in
 installing old versions of packages when newer versions would work just as well,
 so try ``environment.yml`` first.
 
-.. _Anaconda:           https://www.anaconda.com/download/
-.. _Miniconda:          https://conda.io/miniconda.html
-.. _git-scm.com:        https://git-scm.com/downloads
-.. _git-lfs.github.com: https://git-lfs.github.com/
+.. _Anaconda:       https://www.anaconda.com/download/
+.. _Miniconda:      https://conda.io/miniconda.html
+.. _git-scm.com:    https://git-scm.com/downloads
+.. _GitHub:         https://github.com/jpgill86/analysis/
 
 Getting started
 ---------------
