@@ -5,6 +5,7 @@
 '''
 
 from collections import OrderedDict
+from functools import wraps
 
 import numpy as np
 import quantities as pq
@@ -14,6 +15,21 @@ import ipywidgets
 from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
+
+def _fix_FrameGrabber_set_file(set_file_func):
+    '''
+    For some video files, ephyviewer sets the incorrect start_time for its
+    FrameGrabber when the set_file method is called. This monkey patch works
+    around the problem by resetting start_time to 0 after set_file is called.
+    '''
+    @wraps(set_file_func)
+    def wrapper(*args, **kwargs):
+        result = set_file_func(*args, **kwargs)
+        frame_grabber = args[0]
+        frame_grabber.start_time = 0
+        return result
+    return wrapper
+ephyviewer.FrameGrabber.set_file = _fix_FrameGrabber_set_file(ephyviewer.FrameGrabber.set_file)
 
 def defaultKeepSignal(sig):
     '''

@@ -21,7 +21,7 @@ example dataset:
   video_file: video.mp4
   annotations_file: annotations.csv
   epoch_encoder_file: epoch-encoder.csv
-  video_offset: -349.7 # trimmed video has bizarre start time
+  video_offset: 640.3
   epoch_encoder_possible_labels: [force, large hump, small hump, B38]
   amplitude_discriminators:
     - name: I2
