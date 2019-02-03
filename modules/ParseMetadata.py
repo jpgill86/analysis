@@ -9,7 +9,7 @@ import re
 import yaml
 import ipywidgets
 
-def _defaults_for_key(key, data_root_dir):
+def _defaults_for_key(key):
     '''
 
     '''
@@ -26,7 +26,7 @@ def _defaults_for_key(key, data_root_dir):
         'description': None,
 
         # the directory containing the data
-        'data_dir': os.path.join(data_root_dir, year, prefix),
+        'data_dir': os.path.join(year, prefix),
 
         # the AxoGraph data file (regex)
         'data_file': key + '.axgd',
@@ -88,7 +88,7 @@ def LoadMetadata(file = 'metadata.yml', data_root_dir = '..'):
     for key in md:
         if md[key] is None:
             md[key] = {}
-        defaults = _defaults_for_key(key, data_root_dir)
+        defaults = _defaults_for_key(key)
         for k in defaults:
             md[key].setdefault(k, defaults[k])
 
@@ -96,6 +96,9 @@ def LoadMetadata(file = 'metadata.yml', data_root_dir = '..'):
     md_with_file_paths = md.copy()
     for key in md:
         dir = md[key]['data_dir']
+        if not os.path.isabs(dir):
+            dir = os.path.join(data_root_dir, dir)
+            md[key]['data_dir'] = dir
         if not os.path.isdir(dir):
             # delete entries for which data_dir cannot be found
             print('Removing "{}" because directory is missing: "{}"'.format(key, dir))
