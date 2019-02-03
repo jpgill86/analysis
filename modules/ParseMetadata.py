@@ -14,10 +14,6 @@ def _defaults_for_key(key):
 
     '''
 
-    # key should have the form 'YYYY-MM-DD_TAG 000'
-    prefix, _ = key.split()
-    year = prefix[:4]
-
     defaults = {
         # store the key with the metadata
         'key': key,
@@ -25,22 +21,22 @@ def _defaults_for_key(key):
         # description of data set
         'description': None,
 
-        # the directory containing the data
-        'data_dir': os.path.join(year, prefix),
+        # the relative path of the directory containing the data
+        'data_dir': None,
 
-        # the AxoGraph data file (regex)
-        'data_file': key + '.axgd',
+        # the ephys data file
+        'data_file': None,
 
         # digital filters to apply before analysis and plotting
         # 0 <= highpass <= lowpass < sample_rate/2
         # - e.g. [{'channel': 'Channel A', 'highpass': 0, 'lowpass': 50}, ...]
         'filters': None,
 
-        # the annotations file (regex)
-        'annotations_file': key + ' ANNOTATIONS.csv',
+        # the annotations file
+        'annotations_file': None,
 
-        # the epoch encoder file (regex)
-        'epoch_encoder_file': key + ' EPOCH-ENCODER.csv',
+        # the epoch encoder file
+        'epoch_encoder_file': None,
 
         # list of labels for epoch encoder
         'epoch_encoder_possible_labels': ['Type 1', 'Type 2', 'Type 3'],
@@ -49,8 +45,8 @@ def _defaults_for_key(key):
         # - e.g. [{'name': 'Unit X', 'channel': 'Channel A', 'amplitude': [75, 150], 'epoch': 'Type 1'}, ...]
         'amplitude_discriminators': None,
 
-        # the output file of a tridesclous spike sorting analysis (regex)
-        'tridesclous_file': key + ' SPIKES.csv',
+        # the output file of a tridesclous spike sorting analysis
+        'tridesclous_file': None,
 
         # dict mapping spike ids to lists of channel indices
         # - e.g. {0: ['Channel A'], 1: ['Channel A'], ...} to indicate clusters 0 and 1 are both on channel A
@@ -62,8 +58,8 @@ def _defaults_for_key(key):
         # - e.g. [[0], [1], [2], [3], [4]] to keep clusters 0-4 as they are and discard all others
         'tridesclous_merge': None,
 
-        # the video file (regex)
-        'video_file': key + '.(mp4|mov)',
+        # the video file
+        'video_file': None,
 
         # the video time offset in seconds
         'video_offset': None,
@@ -84,34 +80,35 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '..'):
     with open(file) as f:
         md = yaml.safe_load(f)
 
-    # fill in missing metadata with default values
+    # iterate over all data sets
     for key in md:
+
+        # fill in missing metadata with default values
         if md[key] is None:
             md[key] = {}
         defaults = _defaults_for_key(key)
         for k in defaults:
             md[key].setdefault(k, defaults[k])
 
-    # check for missing files and construct file paths
-    md_with_file_paths = md.copy()
-    for key in md:
-        dir = md[key]['data_dir']
-        if not os.path.isabs(dir):
-            dir = os.path.join(local_data_root, dir)
-            md[key]['data_dir'] = dir
-        if not os.path.isdir(dir):
-            # delete entries for which data_dir cannot be found
-            print('Removing "{}" because directory is missing: "{}"'.format(key, dir))
-            del md_with_file_paths[key]
+        # determine the absolute path of the local data directory
+        # - if provided, use:   abs_local_data_dir
+        # - otherwise, use:     local_data_root + data_dir
+        if 'abs_local_data_dir' in md[key]:
+            abs_local_data_dir = md[key]['abs_local_data_dir']
+        elif 'data_dir' in md[key]:
+            abs_local_data_dir = os.path.abspath(os.path.join(local_data_root, md[key]['data_dir']))
         else:
-            # prepend data_dir to file paths unless None was explicitly given
-            for file in [k for k in md[key] if k.endswith('_file')]:
-                regex = md[key][file]
-                if regex is not None:
-                    matching_files = [file for file in os.listdir(dir) if re.fullmatch(regex, file)]
-                    md_with_file_paths[key][file] = os.path.join(dir, matching_files[0]) if matching_files else None
+            raise ValueError('Neither "data_dir" nor "abs_local_data_dir" was found for "{}"'.format(key))
+        abs_local_data_dir = os.path.normpath(abs_local_data_dir)
+        md[key]['abs_local_data_dir'] = abs_local_data_dir
 
-    return md_with_file_paths
+        # prepend the absolute path of the local data directory to file paths
+        for file in [k for k in md[key] if k.endswith('_file')]:
+            rel_file_path = md[key][file]
+            if rel_file_path is not None:
+                md[key][file] = os.path.normpath(os.path.join(abs_local_data_dir, rel_file_path))
+
+    return md
 
 class MetadataSelector(ipywidgets.Select):
     '''
