@@ -182,6 +182,12 @@ class MetadataSelector(ipywidgets.Select):
         '''
         return self.all_metadata[self.value]
 
+    def __iter__(self, *args):
+        '''
+        Pass-through method for using __iter__ on the selected metadata set.
+        '''
+        return self.selected_metadata.__iter__(*args)
+
     def __getitem__(self, *args):
         '''
         Pass-through method for using __getitem__ on the selected metadata set.
