@@ -75,7 +75,7 @@ def _defaults_for_key(key):
 
     return defaults
 
-def LoadMetadata(file = 'metadata.yml', data_root_dir = '..'):
+def LoadMetadata(file = 'metadata.yml', local_data_root = '..'):
     '''
 
     '''
@@ -97,7 +97,7 @@ def LoadMetadata(file = 'metadata.yml', data_root_dir = '..'):
     for key in md:
         dir = md[key]['data_dir']
         if not os.path.isabs(dir):
-            dir = os.path.join(data_root_dir, dir)
+            dir = os.path.join(local_data_root, dir)
             md[key]['data_dir'] = dir
         if not os.path.isdir(dir):
             # delete entries for which data_dir cannot be found
@@ -132,7 +132,7 @@ class MetadataSelector(ipywidgets.Select):
     >>> metadata['data_file']
     '''
 
-    def __init__(self, file = 'metadata.yml', data_root_dir = '..', initial_selection = None):
+    def __init__(self, file = 'metadata.yml', local_data_root = '..', initial_selection = None):
         '''
         Initialize a new MetadataSelector. The metadata file is read at
         initialization.
@@ -142,7 +142,7 @@ class MetadataSelector(ipywidgets.Select):
         super(ipywidgets.Select, self).__init__()
 
         # read the metadata file
-        self.all_metadata = LoadMetadata(file, data_root_dir)
+        self.all_metadata = LoadMetadata(file, local_data_root)
 
         # create display text for the selector from keys and descriptions
         longest_key_length = max([len(k) for k in self.all_metadata.keys()])
