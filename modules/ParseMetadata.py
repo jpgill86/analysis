@@ -9,6 +9,8 @@ import urllib
 import yaml
 import ipywidgets
 
+from Downloads import safe_download
+
 
 def abs_path(metadata, file):
     '''
@@ -43,6 +45,26 @@ def is_url(url):
         return all([result.scheme, result.netloc])
     except Exception:
         return False
+
+
+def DownloadAllDataFiles(metadata):
+    '''
+    Download all files associated with metadata
+    '''
+
+    if not is_url(metadata['remote_data_dir']):
+        print('metadata[remote_data_dir] is not a full URL')
+        return
+
+    for file in [k for k in metadata if k.endswith('_file')]:
+        if metadata[file]:
+
+            # create directories if necessary
+            if not os.path.exists(os.path.dirname(abs_path(metadata, file))):
+                os.makedirs(os.path.dirname(abs_path(metadata, file)))
+
+            # download the file only if it does not already exist
+            safe_download(abs_url(metadata, file), abs_path(metadata, file))
 
 
 def _defaults_for_key(key):
@@ -190,7 +212,7 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root 
 
     return md
 
-class MetadataSelector(ipywidgets.Select):
+class MetadataSelector(ipywidgets.VBox):
     '''
     Interactive list box for Jupyter notebooks that allows the user to select
     which metadata set they would like to work with.
@@ -215,33 +237,44 @@ class MetadataSelector(ipywidgets.Select):
         initialization.
         '''
 
-        # initialize the selector
-        super(ipywidgets.Select, self).__init__()
+        # initialize the box
+        super(ipywidgets.VBox, self).__init__()
+
+        # create the selector
+        self.selector = ipywidgets.Select()
 
         # read the metadata file
         self.all_metadata = LoadMetadata(file, local_data_root, remote_data_root)
 
         # create display text for the selector from keys and descriptions
         longest_key_length = max([len(k) for k in self.all_metadata.keys()])
-        self.options = [(k.ljust(longest_key_length + 4) + str(self.all_metadata[k]['description'] if self.all_metadata[k]['description'] else ''), k) for k in self.all_metadata.keys()]
+        self.selector.options = [(k.ljust(longest_key_length + 4) + str(self.all_metadata[k]['description'] if self.all_metadata[k]['description'] else ''), k) for k in self.all_metadata.keys()]
 
         # validate and set initial selection
         if initial_selection is None:
-            self.value = list(self.all_metadata)[0]
+            self.selector.value = list(self.all_metadata)[0]
         elif initial_selection not in self.all_metadata:
             raise ValueError('{} was not found in {}'.format(initial_selection, file))
         else:
-            self.value = initial_selection
+            self.selector.value = initial_selection
 
         # set other selector display options
-        self.description = 'Data set:'
-        self.rows = 10
-        self.layout = ipywidgets.Layout(width = '100%')
-        self.style = {'description_width': 'initial'}
+        self.selector.description = 'Data set:'
+        self.selector.rows = 10
+        self.selector.layout = ipywidgets.Layout(width = '99%')
+        self.selector.style = {'description_width': 'initial'}
 
         # configure the _on_select function to be called whenever the selection changes
-        self.observe(self._on_select, names = 'value')
-        self._on_select({'new': self.value}) # run now on initial selection
+        self.selector.observe(self._on_select, names = 'value')
+        self._on_select({'new': self.selector.value}) # run now on initial selection
+
+        # create the download button
+        # self.download_button = ipywidgets.Button(icon='download', description='Download', layout=ipywidgets.Layout(height='auto'), disabled=False)
+        # self.download_button.on_click(self._on_download_clicked)
+
+        # populate the box
+        # self.children = [self.selector, self.download_button]
+        self.children = [self.selector]
 
     def _on_select(self, change):
         '''
@@ -250,14 +283,20 @@ class MetadataSelector(ipywidgets.Select):
 
         # warn if video_offset is not set
         if self.selected_metadata['video_offset'] is None:
-            print('Warning: Video sync may be incorrect! video_offset not set for {}'.format(self.value))
+            print('Warning: Video sync may be incorrect! video_offset not set for {}'.format(self.selector.value))
+
+    # def _on_download_clicked(self, button):
+    #     '''
+    #     Run each time the download button is clicked.
+    #     '''
+    #     DownloadAllDataFiles(self.selected_metadata)
 
     @property
     def selected_metadata(self):
         '''
         The access point for the selected metadata set.
         '''
-        return self.all_metadata[self.value]
+        return self.all_metadata[self.selector.value]
 
     def __iter__(self, *args):
         '''

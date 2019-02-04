@@ -1,0 +1,197 @@
+import ftplib
+import urllib
+from urllib.request import FTPHandler
+from urllib.parse import splitport, splituser, unquote
+from getpass import getpass
+
+
+class FTPVeryBasicAuthHandler(FTPHandler):
+    '''
+    This subclass of urllib.request.FTPHandler implements basic authentication
+    management for FTP connections. Instead of raising an exception when login
+    credentials are required but not provided in the URL, as FTPHandler does,
+    this handler will prompt the user for a username and password and try
+    again. After valid credentials are provided, they are stored so that the
+    user does not need to be prompted again when accessing the same host
+    (unless remember_passwords=False).
+
+    Authentication management is "very" basic compared to standard library
+    classes like HTTPBasicAuthHandler that support password managers.
+
+    This subclass also ensures that file size is included in the response
+    header, which can fail for some FTP servers if the original FTPHandler is
+    used.
+
+    This handler can be installed globally in a Python session so that calls
+    to urllib.request.urlopen('ftp://...') will use it automatically:
+
+    >>> handler = FTPVeryBasicAuthHandler()
+    >>> opener = urllib.request.build_opener(handler)
+    >>> urllib.request.install_opener(opener)
+    '''
+
+    def __init__(self, remember_passwords=True, max_bad_login_attempts=3):
+
+        self.remember_passwords = remember_passwords
+        self.max_bad_login_attempts = max_bad_login_attempts
+        self.passwd = {}
+        return super().__init__()
+
+    def ftp_open(self, req):
+        '''
+        When ftp requests are made using this handler, this function gets
+        called at some point, and it calls the connect_ftp method. In this
+        subclass's reimplementation of connect_ftp, the FQDN of the request's
+        host is needed to show the user which system they should enter
+        credentials for. However, by the time connect_ftp is called, that
+        information has been stripped away, and the host argument passed to
+        connect_ftp contains only the host's IP address instead of the FQDN.
+        This reimplementation of ftp_open, which is little more than a
+        copy-and-paste from the superclass's implementation, captures the
+        original host FQDN before it is replaced with the IP address and saves
+        it for later use.
+
+        This reimplementation also ensures that the file size appears in the
+        response header by querying for it directly. For some FTP servers the
+        original implementation should handle this (retrlen should contain the
+        file size). However, for others this can fail silently due to the
+        server response not matching an anticipated regular expression.
+        '''
+
+        import sys
+        import email
+        import socket
+        from urllib.error import URLError
+        from urllib.parse import splitattr, splitpasswd, splitvalue
+        from urllib.response import addinfourl
+
+        ####################################################
+        #  COPIED FROM FTPHandler.ftp_open (PYTHON 3.6.6)  #
+        #  WITH JUST A FEW ADDITIONS                       #
+        ####################################################
+
+        import ftplib
+        import mimetypes
+        host = req.host
+        if not host:
+            raise URLError('ftp error: no host given')
+        host, port = splitport(host)
+        if port is None:
+            port = ftplib.FTP_PORT
+        else:
+            port = int(port)
+
+        # username/password handling
+        user, host = splituser(host)
+        if user:
+            user, passwd = splitpasswd(user)
+        else:
+            passwd = None
+        host = unquote(host)
+        user = user or ''
+        passwd = passwd or ''
+
+        ############################################
+        # DIFFERENT FROM FTPHandler.ftp_open
+        # save the host FQDN for later
+        self.last_req_host = host
+        ############################################
+        try:
+            host = socket.gethostbyname(host)
+        except OSError as msg:
+            raise URLError(msg)
+        path, attrs = splitattr(req.selector)
+        dirs = path.split('/')
+        dirs = list(map(unquote, dirs))
+        dirs, file = dirs[:-1], dirs[-1]
+        if dirs and not dirs[0]:
+            dirs = dirs[1:]
+        try:
+            fw = self.connect_ftp(user, passwd, host, port, dirs, req.timeout)
+            type = file and 'I' or 'D'
+            for attr in attrs:
+                attr, value = splitvalue(attr)
+                if attr.lower() == 'type' and \
+                   value in ('a', 'A', 'i', 'I', 'd', 'D'):
+                    type = value.upper()
+            ############################################
+            # DIFFERENT FROM FTPHandler.ftp_open
+            size = fw.ftp.size(file)
+            ############################################
+            fp, retrlen = fw.retrfile(file, type)
+            headers = ""
+            mtype = mimetypes.guess_type(req.full_url)[0]
+            if mtype:
+                headers += "Content-type: %s\n" % mtype
+            if retrlen is not None and retrlen >= 0:
+                headers += "Content-length: %d\n" % retrlen
+            ############################################
+            # DIFFERENT FROM FTPHandler.ftp_open
+            elif size is not None and size >= 0:
+                headers += "Content-length: %d\n" % size
+            ############################################
+            headers = email.message_from_string(headers)
+            return addinfourl(fp, headers, req.full_url)
+        except ftplib.all_errors as exp:
+            exc = URLError('ftp error: %r' % exp)
+            raise exc.with_traceback(sys.exc_info()[2])
+
+    def connect_ftp(self, user, passwd, host, port, dirs, timeout):
+        '''
+        Unless authentication credentials are provided in the request URL
+        (ftp://user:passwd@host/path), this method will be called with empty
+        user and passwd arguments. If the host requires authentication, the
+        superclass's implementation of connect_ftp will fail and raise an
+        exception. This reimplementation of connect_ftp catches exceptions
+        related to login authentication and prompts the user for credentials
+        before retrying automatically. If the host accepts the credentials,
+        they are stored so that future connections to the same host do not
+        require user input.
+        '''
+
+        login_needed = False
+        bad_login_attempts = 0
+
+        while True:
+            try:
+                fw = super().connect_ftp(user, passwd, host, port, dirs, timeout)
+                if login_needed and host not in self.passwd:
+                    print('Login successful')
+                    if self.remember_passwords:
+                        self.passwd[host] = (user, passwd)
+                return fw
+            except ftplib.all_errors as e:
+                if e.args[0] == '530 This is a private system - No anonymous login':
+                    pass
+                elif e.args[0] == '530 Login authentication failed':
+                    bad_login_attempts += 1
+                    print('Bad login credentials (attempt {} of {})'.format(
+                        bad_login_attempts, self.max_bad_login_attempts))
+                elif e.args[0] == '553 User not allow':
+                    bad_login_attempts += 1
+                    print('User {} does not have permission (attempt {} of {})'.format(
+                        user, bad_login_attempts, self.max_bad_login_attempts))
+                else:
+                    print('Cannot connect: {}'.format(e))
+                    raise
+
+                if bad_login_attempts >= self.max_bad_login_attempts:
+                    print('Aborting login')
+                    raise
+
+                login_needed = True
+                if host in self.passwd:
+                    user, passwd = self.passwd[host]
+                else:
+                    user = input('User name on {}: '.format(self.last_req_host))
+                    passwd = getpass('Password: ')
+
+
+def setup(remember_passwords=True, max_bad_login_attempts=3):
+    '''
+    Install FTPVeryBasicAuthHandler as the global default FTP handler
+    '''
+
+    handler = FTPVeryBasicAuthHandler(remember_passwords, max_bad_login_attempts)
+    opener = urllib.request.build_opener(handler)
+    urllib.request.install_opener(opener)

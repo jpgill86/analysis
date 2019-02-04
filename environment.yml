@@ -14,6 +14,7 @@ dependencies:
   - quantities
   - seaborn
   - statsmodels
+  - tqdm
   - pip:
     - axographio>=0.3.1
     - neo>=0.7.0
