@@ -10,6 +10,7 @@ import quantities as pq
 import elephant
 import neo
 
+from ParseMetadata import abs_path
 from neo.test.generate_datasets import fake_neo
 
 def LoadAndPrepareData(metadata, fake_data_for_testing = False):
@@ -27,8 +28,8 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
     # read in annotations
     annotations_dataframe = ReadAnnotationsFile(metadata)
     if annotations_dataframe is not None:
-        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(annotations_dataframe, metadata, metadata['annotations_file'])
-        blk.segments[0].events += CreateNeoEventsFromDataframe(annotations_dataframe, metadata, metadata['annotations_file'])
+        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
+        blk.segments[0].events += CreateNeoEventsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
     else:
         if fake_data_for_testing:
             blk.segments[0].epochs += [fake_neo('Epoch') for _ in range(5)]
@@ -37,8 +38,8 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
     # read in epoch encoder file
     epoch_encoder_dataframe = ReadEpochEncoderFile(metadata)
     if epoch_encoder_dataframe is not None:
-        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(epoch_encoder_dataframe, metadata, metadata['epoch_encoder_file'])
-        blk.segments[0].events += CreateNeoEventsFromDataframe(epoch_encoder_dataframe, metadata, metadata['epoch_encoder_file'])
+        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
+        blk.segments[0].events += CreateNeoEventsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
 
     # classify spikes by amplitude
     blk.segments[0].spiketrains += RunAmplitudeDiscriminators(metadata, blk)
@@ -66,7 +67,7 @@ def ReadDataFile(metadata):
     '''
 
     # read in the AxoGraph data
-    axoio = neo.io.AxographIO(metadata['data_file'])
+    axoio = neo.io.AxographIO(abs_path(metadata, 'data_file'))
     blk = axoio.read_block()
 
     return blk
@@ -91,7 +92,7 @@ def ReadAnnotationsFile(metadata):
         }
 
         # parse the file and create a dataframe
-        df = pd.read_csv(metadata['annotations_file'], dtype = dtypes)
+        df = pd.read_csv(abs_path(metadata, 'annotations_file'), dtype = dtypes)
 
         # increment row labels by 2 so they match the source file
         # which is 1-indexed and has a header
@@ -153,7 +154,7 @@ def ReadEpochEncoderFile(metadata):
         }
 
         # parse the file and create a dataframe
-        df = pd.read_csv(metadata['epoch_encoder_file'], dtype = dtypes)
+        df = pd.read_csv(abs_path(metadata, 'epoch_encoder_file'), dtype = dtypes)
 
         # increment row labels by 2 so they match the source file
         # which is 1-indexed and has a header
@@ -213,7 +214,7 @@ def ReadSpikesFile(metadata, blk):
     else:
 
         # parse the file and create a dataframe
-        df = pd.read_csv(metadata['tridesclous_file'], names = ['index', 'label'])
+        df = pd.read_csv(abs_path(metadata, 'tridesclous_file'), names = ['index', 'label'])
 
         # drop clusters with negative labels
         df = df[df['label'] >= 0]
@@ -296,7 +297,7 @@ def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, samp
         # create a Neo SpikeTrain for each cluster label
         st = neo.SpikeTrain(
             name = str(spike_label),
-            file_origin = metadata['tridesclous_file'],
+            file_origin = abs_path(metadata, 'tridesclous_file'),
             channels = channels, # custom annotation
             amplitude = None,    # custom annotation
             times = t_start + sampling_period * df['index'].values,

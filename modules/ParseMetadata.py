@@ -5,9 +5,45 @@ Import metadata about experimental data
 '''
 
 import os
-import re
+import urllib
 import yaml
 import ipywidgets
+
+
+def abs_path(metadata, file):
+    '''
+    Convert the relative path of file to an absolute path using data_dir
+    '''
+    if metadata[file] is None:
+        return None
+    else:
+        return os.path.normpath(os.path.join(metadata['data_dir'], metadata[file]))
+
+
+def abs_url(metadata, file):
+    '''
+    Convert the relative path of file to a full URL using remote_data_dir
+    '''
+    if metadata[file] is None or metadata['remote_data_dir'] is None:
+        return None
+    else:
+        file_path = metadata[file].replace(os.sep, '/')
+        url = '/'.join([metadata['remote_data_dir'], file_path])
+        # url = urllib.parse.unquote(url)
+        # url = urllib.parse.quote(url, safe='/:')
+        return url
+
+
+def is_url(url):
+    '''
+    Returns True only if the parameter begins with the form <scheme>://<netloc>
+    '''
+    try:
+        result = urllib.parse.urlparse(url)
+        return all([result.scheme, result.netloc])
+    except Exception:
+        return False
+
 
 def _defaults_for_key(key):
     '''
@@ -21,10 +57,23 @@ def _defaults_for_key(key):
         # description of data set
         'description': None,
 
-        # the relative path of the directory containing the data
+        # the path of the directory containing the data on the local system
+        # - this may be an absolute or relative path, but not None since data
+        #   must be located locally
+        # - if it is a relative path, it will be interpreted by LoadMetadata as
+        #   relative to local_data_root and will be converted to an absolute
+        #   path
         'data_dir': None,
 
+        # the path of the directory containing the data on a remote server
+        # - this may be a full URL or a relative path, or None if there exists
+        #   no remote data store
+        # - if it is a relative path, it will be interpreted by LoadMetadata as
+        #   relative to remote_data_root and will be convered to a full URL
+        'remote_data_dir': None,
+
         # the ephys data file
+        # - path relative to data_dir and remote_data_dir
         'data_file': None,
 
         # digital filters to apply before analysis and plotting
@@ -33,9 +82,11 @@ def _defaults_for_key(key):
         'filters': None,
 
         # the annotations file
+        # - path relative to data_dir and remote_data_dir
         'annotations_file': None,
 
         # the epoch encoder file
+        # - path relative to data_dir and remote_data_dir
         'epoch_encoder_file': None,
 
         # list of labels for epoch encoder
@@ -46,6 +97,7 @@ def _defaults_for_key(key):
         'amplitude_discriminators': None,
 
         # the output file of a tridesclous spike sorting analysis
+        # - path relative to data_dir and remote_data_dir
         'tridesclous_file': None,
 
         # dict mapping spike ids to lists of channel indices
@@ -59,6 +111,7 @@ def _defaults_for_key(key):
         'tridesclous_merge': None,
 
         # the video file
+        # - path relative to data_dir and remote_data_dir
         'video_file': None,
 
         # the video time offset in seconds
@@ -71,9 +124,26 @@ def _defaults_for_key(key):
 
     return defaults
 
-def LoadMetadata(file = 'metadata.yml', local_data_root = '..'):
+def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root = None):
     '''
+    Read metadata stored in a YAML file about available collections of data,
+    assign defaults to missing values, and resolve absolute paths for local
+    data stores and full URLs for remote data stores.
 
+    The "data_dir" property must be provided for every data set and specifies
+    the directory on the local system containing the data files. "data_dir" may
+    be an absolute path or a relative path with respect to `local_data_root`.
+    If it is a relative path, it will be converted to an absolute path.
+
+    The "remote_data_dir" property is optional and specifies the directory on a
+    remote server containing the data files. "remote_data_dir" may be a full
+    URL or a relative path with respect to `remote_data_root`, which must be a
+    full URL. If it is a relative path, it will be converted to a full URL.
+
+    File paths (e.g., "data_file", "video_file") are assumed to be relative to
+    both "data_dir" and "remote_data_dir" (i.e., the local and remote data
+    stores mirror one another) and can be resolved with `abs_path` or
+    `abs_url`.
     '''
 
     # load metadata from file
@@ -91,22 +161,32 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '..'):
             md[key].setdefault(k, defaults[k])
 
         # determine the absolute path of the local data directory
-        # - if provided, use:   abs_local_data_dir
-        # - otherwise, use:     local_data_root + data_dir
-        if 'abs_local_data_dir' in md[key]:
-            abs_local_data_dir = md[key]['abs_local_data_dir']
-        elif 'data_dir' in md[key]:
-            abs_local_data_dir = os.path.abspath(os.path.join(local_data_root, md[key]['data_dir']))
+        if md[key]['data_dir'] is not None:
+            # data_dir is either an absolute path already or is specified
+            # relative to local_data_root
+            if os.path.isabs(md[key]['data_dir']):
+                dir = md[key]['data_dir']
+            else:
+                dir = os.path.abspath(os.path.join(local_data_root, md[key]['data_dir']))
         else:
-            raise ValueError('Neither "data_dir" nor "abs_local_data_dir" was found for "{}"'.format(key))
-        abs_local_data_dir = os.path.normpath(abs_local_data_dir)
-        md[key]['abs_local_data_dir'] = abs_local_data_dir
+            # data_dir is a required property
+            raise ValueError('"data_dir" missing for "{}"'.format(key))
+        md[key]['data_dir'] = os.path.normpath(dir)
 
-        # prepend the absolute path of the local data directory to file paths
-        for file in [k for k in md[key] if k.endswith('_file')]:
-            rel_file_path = md[key][file]
-            if rel_file_path is not None:
-                md[key][file] = os.path.normpath(os.path.join(abs_local_data_dir, rel_file_path))
+        # determine the full URL to the remote data directory
+        if md[key]['remote_data_dir'] is not None:
+            # remote_data_dir is either a full URL already or is specified
+            # relative to remote_data_root
+            if is_url(md[key]['remote_data_dir']):
+                url = md[key]['remote_data_dir']
+            elif is_url(remote_data_root):
+                url = '/'.join([remote_data_root, md[key]['remote_data_dir']])
+            else:
+                url = None
+        else:
+            # there is no remote data store
+            url = None
+        md[key]['remote_data_dir'] = url
 
     return md
 
@@ -129,7 +209,7 @@ class MetadataSelector(ipywidgets.Select):
     >>> metadata['data_file']
     '''
 
-    def __init__(self, file = 'metadata.yml', local_data_root = '..', initial_selection = None):
+    def __init__(self, file = 'metadata.yml', local_data_root = '.', remote_data_root = None, initial_selection = None):
         '''
         Initialize a new MetadataSelector. The metadata file is read at
         initialization.
@@ -139,7 +219,7 @@ class MetadataSelector(ipywidgets.Select):
         super(ipywidgets.Select, self).__init__()
 
         # read the metadata file
-        self.all_metadata = LoadMetadata(file, local_data_root)
+        self.all_metadata = LoadMetadata(file, local_data_root, remote_data_root)
 
         # create display text for the selector from keys and descriptions
         longest_key_length = max([len(k) for k in self.all_metadata.keys()])

@@ -12,6 +12,7 @@ import quantities as pq
 import ephyviewer
 import ipywidgets
 
+from ParseMetadata import abs_path
 from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
@@ -356,7 +357,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         if self.is_enabled('epoch_encoder') and metadata['epoch_encoder_file'] is not None:
 
             writable_epoch_source = ephyviewer.CsvEpochSource(
-                filename = metadata['epoch_encoder_file'],
+                filename = abs_path(metadata, 'epoch_encoder_file'),
                 possible_labels = metadata['epoch_encoder_possible_labels'],
             )
 
@@ -369,7 +370,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         if self.is_enabled('video') and metadata['video_file'] is not None:
 
-            video_source = ephyviewer.MultiVideoFileSource(video_filenames = [metadata['video_file']])
+            video_source = ephyviewer.MultiVideoFileSource(video_filenames = [abs_path(metadata, 'video_file')])
             if metadata['video_offset'] is not None:
                 video_source.t_starts[0] += metadata['video_offset']
                 video_source.t_stops[0]  += metadata['video_offset']
