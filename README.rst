@@ -53,10 +53,10 @@ Using the Jupyter file browser, navigate to a Jupyter notebook file
 Running the ephyviewer example
 ------------------------------
 
-Launch the ``Ephyviewer.ipynb`` notebook located in the ``example`` directory.
-Run all cells in order. A Qt-based graphical user interface will launch.
-(Note that this type of GUI cannot be launched from a Jupyter server running on
-a remote computer, such as with MyBinder.org.)
+Launch the ``Data Explorer.ipynb`` notebook located in the ``example``
+directory. Run all cells in order. A Qt-based graphical user interface will
+launch. (Note that this type of GUI cannot be launched from a Jupyter server
+running on a remote computer, such as with MyBinder.org.)
 
 .. image:: example/ephyviewer-screenshot.png
 
