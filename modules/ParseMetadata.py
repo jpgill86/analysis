@@ -269,8 +269,8 @@ class MetadataSelector(ipywidgets.VBox):
         self._on_select({'new': self.selector.value}) # run now on initial selection
 
         # create the download button
-        # self.download_button = ipywidgets.Button(icon='download', description='Download', layout=ipywidgets.Layout(height='auto'), disabled=False)
-        # self.download_button.on_click(self._on_download_clicked)
+        self.download_button = ipywidgets.Button(icon='download', description='Download', layout=ipywidgets.Layout(height='auto'), disabled=False)
+        self.download_button.on_click(self._on_download_clicked)
 
         # populate the box
         # self.children = [self.selector, self.download_button]
@@ -285,11 +285,11 @@ class MetadataSelector(ipywidgets.VBox):
         if self.selected_metadata['video_offset'] is None:
             print('Warning: Video sync may be incorrect! video_offset not set for {}'.format(self.selector.value))
 
-    # def _on_download_clicked(self, button):
-    #     '''
-    #     Run each time the download button is clicked.
-    #     '''
-    #     DownloadAllDataFiles(self.selected_metadata)
+    def _on_download_clicked(self, button):
+        '''
+        Run each time the download button is clicked.
+        '''
+        DownloadAllDataFiles(self.selected_metadata)
 
     @property
     def selected_metadata(self):
