@@ -18,7 +18,7 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
 
     '''
 
-    # read in the AxoGraph data
+    # read in the electrophysiology data
     blk = ReadDataFile(metadata)
     # blk = CreateNeoBlockExample()
 
@@ -66,9 +66,9 @@ def ReadDataFile(metadata):
 
     '''
 
-    # read in the AxoGraph data
-    axoio = neo.io.AxographIO(abs_path(metadata, 'data_file'))
-    blk = axoio.read_block()
+    # read in the electrophysiology data
+    io = neo.io.get_io(abs_path(metadata, 'data_file'))
+    blk = io.read_block()
 
     return blk
 
@@ -316,14 +316,14 @@ def ApplyFilters(metadata, blk):
 
     if metadata['filters'] is not None:
 
-        signalNameToAxoGraphIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
+        signalNameToIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
 
         for sig_filter in metadata['filters']:
 
-            index = signalNameToAxoGraphIndex.get(sig_filter['channel'], None)
+            index = signalNameToIndex.get(sig_filter['channel'], None)
             if index is None:
 
-                print('Warning: skipping filter with channel name {} because channel was not found in AxoGraph file!'.format(sig_filter['channel']))
+                print('Warning: skipping filter with channel name {} because channel was not found!'.format(sig_filter['channel']))
 
             else:
 
@@ -350,15 +350,15 @@ def RunAmplitudeDiscriminators(metadata, blk):
 
     if metadata['amplitude_discriminators'] is not None:
 
-        signalNameToAxoGraphIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
+        signalNameToIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
 
         # classify spikes by amplitude
         for discriminator in metadata['amplitude_discriminators']:
 
-            index = signalNameToAxoGraphIndex.get(discriminator['channel'], None)
+            index = signalNameToIndex.get(discriminator['channel'], None)
             if index is None:
 
-                print('Warning: skipping amplitude discriminator with channel name {} because channel was not found in AxoGraph file!'.format(discriminator['channel']))
+                print('Warning: skipping amplitude discriminator with channel name {} because channel was not found!'.format(discriminator['channel']))
 
             else:
 

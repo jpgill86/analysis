@@ -68,14 +68,14 @@ def setDefaultsForPlots(metadata, blk):
     '''
 
     sigs = blk.segments[0].analogsignals
-    signalNameToBlockIndex = {sig.name:i for i, sig in enumerate(sigs)}
+    signalNameToIndex = {sig.name:i for i, sig in enumerate(sigs)}
 
     if metadata['plots'] is None:
         metadata['plots'] = [{'channel': sig.name} for sig in sigs if defaultKeepSignal(sig)]
 
     plots = []
     for plot in metadata['plots']:
-        index = signalNameToBlockIndex.get(plot['channel'], None)
+        index = signalNameToIndex.get(plot['channel'], None)
         if index is None:
             print('Warning: removing plot with channel name "{}" because channel was not found in blk!'.format(plot['channel']))
         else:
@@ -201,7 +201,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         setDefaultsForPlots(metadata, blk)
 
-        signalNameToPlotIndex = {p['channel']:i for i, p in enumerate(metadata['plots'])}
+        plotNameToIndex = {p['channel']:i for i, p in enumerate(metadata['plots'])}
 
         ########################################################################
         # PREPARE SCATTER PLOT PARAMETERS
@@ -213,7 +213,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             if 'channels' in st.annotations:
                 c = []
                 for channel in st.annotations['channels']:
-                    index = signalNameToPlotIndex.get(channel, None)
+                    index = plotNameToIndex.get(channel, None)
                     if index is None:
                         print('Note: Spike train {} will not be plotted on channel {} because that channel isn\'t being plotted'.format(st.name, channel))
                     else:
