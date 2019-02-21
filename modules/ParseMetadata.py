@@ -260,7 +260,7 @@ class MetadataSelector(ipywidgets.VBox):
 
         # set other selector display options
         self.selector.description = 'Data set:'
-        self.selector.rows = 10
+        self.selector.rows = 20
         self.selector.layout = ipywidgets.Layout(width = '99%')
         self.selector.style = {'description_width': 'initial'}
 
