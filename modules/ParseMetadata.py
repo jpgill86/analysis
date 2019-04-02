@@ -8,6 +8,7 @@ import os
 import urllib
 import yaml
 import ipywidgets
+from IPython.display import HTML
 
 from Downloads import safe_download
 
@@ -257,6 +258,10 @@ class MetadataSelector(ipywidgets.VBox):
             raise ValueError('{} was not found in {}'.format(initial_selection, file))
         else:
             self.selector.value = initial_selection
+
+        # use monospace font for items in the selector
+        self.selector.add_class('metadata-selector')
+        display(HTML('<style>.metadata-selector option {font-family: monospace;}</style>'))
 
         # set other selector display options
         self.selector.description = 'Data set:'
