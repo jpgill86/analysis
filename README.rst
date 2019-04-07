@@ -20,14 +20,10 @@ On the command line, navigate to the top-level directory::
 Create a new conda environment::
 
     conda env create -f environment.yml -n <envname>
-    conda activate <envname>
-    pip install -r requirements.txt
 
 where ``<envname>`` can be anything you like, or update an existing one::
 
     conda env update -f environment.yml -n <envname>
-    conda activate <envname>
-    pip install -U -r requirements.txt
 
 You may use ``snapshots/environment-XXXX-XX-XX.yml`` instead to create an exact
 replica of an environment created from ``environment.yml`` from a particular
@@ -87,11 +83,3 @@ As of 2018-11-29, with ipykernel>=5.0.0 (versions 5.0.0 and 5.1.0 tested), there
 is a compatibility issue with tridesclous in which the kernel sometimes fails to
 recognize that a GUI window has been closed and becomes unresponsive. To work
 around this, ipykernel is pinned to an older version in ``environment.yml``.
-
-As of 2019-03-27, conda>=4.6.3 has an issue_ in Windows that causes instructions
-for pip located in `environment.yml` to be ignored. I added to the installation
-instructions explicit `pip install` commands to work around this. This is likely
-not an issue in Mac or Linux, so `conda env create` should be enough, and the
-issue will hopefully be fixed for Windows in conda>=4.6.9.
-
-.. _issue: https://github.com/conda/conda/issues/8404

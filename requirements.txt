@@ -1,7 +1,0 @@
-axographio>=0.3.1
-neo>=0.7.1
-pylttb
-spm1d
-git+https://github.com/jpgill86/ephyviewer.git@experimental
-git+https://github.com/jpgill86/elephant.git@experimental
-git+https://github.com/tridesclous/tridesclous.git@master
