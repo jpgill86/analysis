@@ -261,7 +261,7 @@ class MetadataSelector(ipywidgets.VBox):
 
         # use monospace font for items in the selector
         self.selector.add_class('metadata-selector')
-        display(HTML('<style>.metadata-selector option {font-family: monospace;}</style>'))
+        display(HTML('<style>.metadata-selector select {font-family: monospace;}</style>'))
 
         # set other selector display options
         self.selector.description = 'Data set:'
