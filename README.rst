@@ -25,15 +25,6 @@ where ``<envname>`` can be anything you like, or update an existing one::
 
     conda env update -f environment.yml -n <envname>
 
-You may use ``snapshots/environment-XXXX-XX-XX.yml`` instead to create an exact
-replica of an environment created from ``environment.yml`` from a particular
-date (these files were created using ``conda env export``, with git commands
-pointing to specific commits added manually). This is useful for tracking down
-bugs or reproducing old results exactly when external package updates create
-unexpected changes in output. Using old environment snapshots may result in
-installing old versions of packages when newer versions would work just as well,
-so try ``environment.yml`` first.
-
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://docs.conda.io/en/latest/miniconda.html
 .. _git-scm.com:    https://git-scm.com/downloads
@@ -75,3 +66,16 @@ The ephyviewer interface is interactive and highly customizable.
 See the `ephyviewer documentation`__ for more details.
 
 __ http://ephyviewer.readthedocs.io
+
+Notes
+-----
+
+When creating a new conda environment, you may use one of the files in the
+``snapshots`` directory instead of ``environment.yml`` to create an exact
+replica of an environment created using that file on a particular date (these
+files were created using ``conda env export``, with git commands pointing to
+specific commits added manually). This is useful for tracking down bugs or
+reproducing old results exactly when external package updates create unexpected
+changes in output. Using old environment snapshots may result in installing old
+versions of packages when newer versions would work just as well, so try
+``environment.yml`` first.
