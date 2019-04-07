@@ -47,13 +47,13 @@ Activate your conda environment and launch Jupyter notebook::
     conda activate <envname>
     jupyter notebook
 
-Using the Jupyter file browser, navigate to a Jupyter notebook file
-(``*.ipynb``) and click on it to begin a session.
+Using the Jupyter file browser, navigate to the ``notebooks`` directory and
+select a Jupyter notebook file (``*.ipynb``) to begin a session.
 
 Running the ephyviewer example
 ------------------------------
 
-Launch the ``Data Explorer.ipynb`` notebook located in the ``example``
+Launch the ``Data Explorer`` notebook located in the top-level ``example``
 directory. Run all cells in order. A Qt-based graphical user interface will
 launch. (Note that this type of GUI cannot be launched from a Jupyter server
 running on a remote computer, such as with MyBinder.org.)
