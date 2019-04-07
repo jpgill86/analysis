@@ -75,11 +75,3 @@ The ephyviewer interface is interactive and highly customizable.
 See the `ephyviewer documentation`__ for more details.
 
 __ http://ephyviewer.readthedocs.io
-
-Notes
------
-
-As of 2018-11-29, with ipykernel>=5.0.0 (versions 5.0.0 and 5.1.0 tested), there
-is a compatibility issue with tridesclous in which the kernel sometimes fails to
-recognize that a GUI window has been closed and becomes unresponsive. To work
-around this, ipykernel is pinned to an older version in ``environment.yml``.

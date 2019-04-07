@@ -3,12 +3,12 @@ channels:
   - defaults
 dependencies:
   - av
-  - ipykernel=4.10.0 # workaround for tridesclous bug
   - ipywidgets
   - matplotlib
   - notebook
   - numpy
   - pandas
+  - pip
   - python>=3
   - pyyaml
   - quantities
@@ -21,5 +21,5 @@ dependencies:
     - pylttb
     - spm1d
     - git+https://github.com/jpgill86/ephyviewer.git@experimental
-    - git+https://github.com/jpgill86/elephant.git@experimental
-    - git+https://github.com/tridesclous/tridesclous.git@master
+    - git+https://github.com/NeuralEnsemble/elephant.git@master
+    - git+https://github.com/jpgill86/tridesclous.git@experimental
