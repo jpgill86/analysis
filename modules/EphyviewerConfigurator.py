@@ -178,8 +178,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         # filter epoch encoder data out of generic epoch and event lists
         # so they are not presented multiple times
-        sources['epoch'][0].all = [ep for ep in sources['epoch'][0].all if ep['name'] != 'Epoch Encoder']
-        sources['event'][0].all = [ev for ev in sources['event'][0].all if ev['name'] != 'Epoch Encoder']
+        sources['epoch'][0].all = [ep for ep in sources['epoch'][0].all if '(from epoch encoder file)' not in ep['label']]
+        sources['event'][0].all = [ev for ev in sources['event'][0].all if '(from epoch encoder file)' not in ev['label']]
 
         ########################################################################
         # APP AND WINDOW

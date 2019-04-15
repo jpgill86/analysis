@@ -181,23 +181,23 @@ def ReadEpochEncoderFile(metadata):
             loc = 1, # insert after 'start'
         )
 
-        # add type
-        df.insert(
-            column = 'Type',
-            value = 'Epoch Encoder',
-            loc = 3, # insert after 'duration'
-        )
-
         # sort entries by time
         df.sort_values([
             'time',
             'duration',
         ], inplace = True)
 
-        # change column names
+        # change column names, including renaming epoch encoder's 'label' to 'Type'
         df = df.rename(
             index = str,
-            columns = {'time': 'Start (s)', 'duration': 'Duration (s)', 'label': 'Label'})
+            columns = {'time': 'Start (s)', 'duration': 'Duration (s)', 'label': 'Type'})
+
+        # add 'Label' column to indicate where these epochs came from
+        df.insert(
+            column = 'Label',
+            value = '(from epoch encoder file)',
+            loc = 4, # insert after 'Type'
+        )
 
         # return the dataframe
         return df
@@ -380,13 +380,16 @@ def RunAmplitudeDiscriminators(metadata, blk):
 
                     time_masks = []
                     if isinstance(discriminator['epoch'], str):
-                        # epoch encoder label
-                        ep = next((ep for ep in blk.segments[0].epochs if ep.name == 'Epoch Encoder'), None)
+                        # search for matching epochs
+                        ep = next((ep for ep in blk.segments[0].epochs if ep.name == discriminator['epoch']), None)
                         if ep is not None:
-                            for t_start, duration, label in zip(ep.times, ep.durations, ep.labels):
-                                if label == discriminator['epoch']:
-                                    t_stop = t_start + duration
-                                    time_masks.append((t_start <= st) & (st < t_stop))
+                            # select spike times that fall within each epoch
+                            for t_start, duration in zip(ep.times, ep.durations):
+                                t_stop = t_start + duration
+                                time_masks.append((t_start <= st) & (st < t_stop))
+                        else:
+                            # no matching epochs found
+                            time_masks.append([False] * len(st))
                     else:
                         # will eventually implement lists of ordered pairs, but
                         # for now raise an error
