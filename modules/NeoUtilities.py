@@ -5,9 +5,9 @@ Tools for working with Neo objects
 '''
 
 import numpy as np
-import quantities as pq
 import neo
 import elephant
+from pylttb import lttb
 
 class CausalAlphaKernel(elephant.kernels.AlphaKernel):
     '''
@@ -35,3 +35,26 @@ class CausalAlphaKernel(elephant.kernels.AlphaKernel):
         '''
         return np.nonzero(t >= 0)[0].min()
     median_index.__doc__ += elephant.kernels.AlphaKernel.median_index.__doc__
+
+def DownsampleNeoSignal(sig, decimation_factor):
+    '''
+
+    '''
+
+    assert sig.shape[1] == 1, 'Can only downsample single-channel signals'
+
+    num_points = int(sig.shape[0] / decimation_factor)
+
+    x_downsampled, y_downsampled = lttb(
+        x=sig.times.magnitude,
+        y=sig.magnitude[:, 0],
+        threshold=num_points,
+    )
+
+    sig_downsampled = neo.IrregularlySampledSignal(
+        times=x_downsampled,
+        signal=y_downsampled,
+        units=sig.units,
+        time_units=sig.times.units,
+    )
+    return sig_downsampled
