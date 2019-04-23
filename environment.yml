@@ -18,9 +18,9 @@ dependencies:
   - tqdm
   - pip:
     - axographio>=0.3.1
+    - elephant>=0.6.2
     - neo>=0.7.1
     - pylttb
     - spm1d
     - git+https://github.com/jpgill86/ephyviewer.git@experimental
-    - git+https://github.com/NeuralEnsemble/elephant.git@master
     - git+https://github.com/jpgill86/tridesclous.git@experimental
