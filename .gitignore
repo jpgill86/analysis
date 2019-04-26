@@ -1,5 +1,6 @@
 # Specific to this project
 /metadata.yml
+*.pdf
 ffs-ignore/
 scratch/
 
