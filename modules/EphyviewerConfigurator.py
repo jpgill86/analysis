@@ -161,9 +161,9 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             self.disable(name)
 
     def _on_launch_clicked(self, button):
-        self.launch_ephyviewer(self.metadata, self.blk, self.rauc_sigs)
+        self.launch_ephyviewer()
 
-    def launch_ephyviewer(self, metadata, blk, rauc_sigs = None):
+    def launch_ephyviewer(self):
         '''
 
         '''
@@ -171,7 +171,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # DATA SOURCES
 
-        seg = blk.segments[0]
+        seg = self.blk.segments[0]
         sigs = seg.analogsignals
         sources = NeoSegmentToEphyviewerSources(seg)
         # sources = ephyviewer.get_sources_from_neo_segment(seg)
@@ -194,14 +194,14 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             global_xsize_zoom = True,
             play_interval = 0.1, # refresh period in seconds
         )
-        win.setWindowTitle(metadata['key'])
+        win.setWindowTitle(self.metadata['key'])
 
         ########################################################################
         # PREPARE TRACE PARAMETERS
 
-        setDefaultsForPlots(metadata, blk)
+        setDefaultsForPlots(self.metadata, self.blk)
 
-        plotNameToIndex = {p['channel']:i for i, p in enumerate(metadata['plots'])}
+        plotNameToIndex = {p['channel']:i for i, p in enumerate(self.metadata['plots'])}
 
         ########################################################################
         # PREPARE SCATTER PLOT PARAMETERS
@@ -228,10 +228,10 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         if self.is_enabled('traces'):
 
             sig_source = ephyviewer.AnalogSignalSourceWithScatter(
-                signals = np.concatenate([sigs[p['index']].as_array(p['units']) for p in metadata['plots']], axis = 1),
+                signals = np.concatenate([sigs[p['index']].as_array(p['units']) for p in self.metadata['plots']], axis = 1),
                 sample_rate = sigs[0].sampling_rate, # assuming all AnalogSignals have the same sampling rate
                 t_start = sigs[0].t_start,           # assuming all AnalogSignals start at the same time
-                channel_names = [p['ylabel'] for p in metadata['plots']],
+                channel_names = [p['ylabel'] for p in self.metadata['plots']],
                 scatter_indexes = spike_indices,
                 scatter_channels = spike_channels,
             )
@@ -252,7 +252,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             trace_view.params['ylim_max'] = 0.5
             trace_view.params['ylim_min'] = -trace_view.source.nb_channel + 0.5
             trace_view.params['scale_mode'] = 'by_channel'
-            for i, p in enumerate(metadata['plots']):
+            for i, p in enumerate(self.metadata['plots']):
                 ylim_span = np.ptp(p['ylim'])
                 ylim_center = np.mean(p['ylim'])
                 trace_view.by_channel_params['ch{}'.format(i), 'gain'] = 1/ylim_span # rescale [ymin,ymax] across a unit
@@ -261,13 +261,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # TRACES OF RAUC
 
-        if self.is_enabled('traces_rauc') and rauc_sigs is not None:
+        if self.is_enabled('traces_rauc') and self.rauc_sigs is not None:
 
             sig_rauc_source = ephyviewer.InMemoryAnalogSignalSource(
-                signals = np.concatenate([rauc_sigs[p['index']].as_array() for p in metadata['plots']], axis = 1),
-                sample_rate = rauc_sigs[0].sampling_rate, # assuming all AnalogSignals have the same sampling rate
-                t_start = rauc_sigs[0].t_start,           # assuming all AnalogSignals start at the same time
-                channel_names = [p['ylabel'] + ' RAUC' for p in metadata['plots']],
+                signals = np.concatenate([self.rauc_sigs[p['index']].as_array() for p in self.metadata['plots']], axis = 1),
+                sample_rate = self.rauc_sigs[0].sampling_rate, # assuming all AnalogSignals have the same sampling rate
+                t_start = self.rauc_sigs[0].t_start,           # assuming all AnalogSignals start at the same time
+                channel_names = [p['ylabel'] + ' RAUC' for p in self.metadata['plots']],
             )
             sources['signal_rauc'] = [sig_rauc_source]
 
@@ -289,8 +289,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             trace_rauc_view.params['ylim_max'] = 0.5
             trace_rauc_view.params['ylim_min'] = -trace_rauc_view.source.nb_channel + 0.5
             trace_rauc_view.params['scale_mode'] = 'by_channel'
-            for i, p in enumerate(metadata['plots']):
-                ylim_span = np.median(rauc_sigs[p['index']].magnitude) * 10
+            for i, p in enumerate(self.metadata['plots']):
+                ylim_span = np.median(self.rauc_sigs[p['index']].magnitude) * 10
                 ylim_center = ylim_span / 2
                 trace_rauc_view.by_channel_params['ch{}'.format(i), 'gain'] = 1/ylim_span # rescale [ymin,ymax] across a unit
                 trace_rauc_view.by_channel_params['ch{}'.format(i), 'offset'] = -i - ylim_center/ylim_span # center [ymin,ymax] within the unit
@@ -354,11 +354,11 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # EPOCH ENCODER
 
-        if self.is_enabled('epoch_encoder') and metadata['epoch_encoder_file'] is not None:
+        if self.is_enabled('epoch_encoder') and self.metadata['epoch_encoder_file'] is not None:
 
             writable_epoch_source = ephyviewer.CsvEpochSource(
-                filename = abs_path(metadata, 'epoch_encoder_file'),
-                possible_labels = metadata['epoch_encoder_possible_labels'],
+                filename = abs_path(self.metadata, 'epoch_encoder_file'),
+                possible_labels = self.metadata['epoch_encoder_possible_labels'],
             )
 
             epoch_encoder = ephyviewer.EpochEncoder(source = writable_epoch_source, name = 'epoch encoder')
@@ -368,12 +368,12 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # VIDEO
 
-        if self.is_enabled('video') and metadata['video_file'] is not None:
+        if self.is_enabled('video') and self.metadata['video_file'] is not None:
 
-            video_source = ephyviewer.MultiVideoFileSource(video_filenames = [abs_path(metadata, 'video_file')])
-            if metadata['video_offset'] is not None:
-                video_source.t_starts[0] += metadata['video_offset']
-                video_source.t_stops[0]  += metadata['video_offset']
+            video_source = ephyviewer.MultiVideoFileSource(video_filenames = [abs_path(self.metadata, 'video_file')])
+            if self.metadata['video_offset'] is not None:
+                video_source.t_starts[0] += self.metadata['video_offset']
+                video_source.t_stops[0]  += self.metadata['video_offset']
                 video_source._t_start = max(min(video_source.t_starts), 0)
                 video_source._t_stop  = max(video_source.t_stops)
 
