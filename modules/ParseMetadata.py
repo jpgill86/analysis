@@ -163,6 +163,11 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root 
     URL or a relative path with respect to `remote_data_root`, which must be a
     full URL. If it is a relative path, it will be converted to a full URL.
 
+    Instead of passing it as an argument to this function, "remote_data_root"
+    may be provided in the file as a special entry with no child properties.
+    Any non-None value passed to this function will override the value provided
+    in the file.
+
     File paths (e.g., "data_file", "video_file") are assumed to be relative to
     both "data_dir" and "remote_data_dir" (i.e., the local and remote data
     stores mirror one another) and can be resolved with `abs_path` or
@@ -172,6 +177,26 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root 
     # load metadata from file
     with open(file) as f:
         md = yaml.safe_load(f)
+
+    # remove remote_data_root from the dict if it exists
+    remote_data_root_from_file = md.pop('remote_data_root', None)
+
+    # use remote_data_root passed to function preferentially
+    if remote_data_root is not None:
+        if not is_url(remote_data_root):
+            raise ValueError('"remote_data_root" passed to function is not a full URL: "{}"'.format(remote_data_root))
+        else:
+            # use the value passed to the function
+            pass
+    elif remote_data_root_from_file is not None:
+        if not is_url(remote_data_root_from_file):
+            raise ValueError('"remote_data_root" provided in file is not a full URL: "{}"'.format(remote_data_root_from_file))
+        else:
+            # use the value provided in the file
+            remote_data_root = remote_data_root_from_file
+    else:
+        # both potential sources of remote_data_root are None
+        pass
 
     # iterate over all data sets
     for key in md:
