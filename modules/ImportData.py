@@ -27,37 +27,29 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
 
     # read in annotations
     annotations_dataframe = ReadAnnotationsFile(metadata)
-    if annotations_dataframe is not None:
-        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
-        blk.segments[0].events += CreateNeoEventsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
-    else:
-        if fake_data_for_testing:
-            blk.segments[0].epochs += [fake_neo('Epoch') for _ in range(5)]
-            blk.segments[0].events += [fake_neo('Event') for _ in range(5)]
+    blk.segments[0].epochs += CreateNeoEpochsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
+    blk.segments[0].events += CreateNeoEventsFromDataframe(annotations_dataframe, metadata, abs_path(metadata, 'annotations_file'))
 
     # read in epoch encoder file
     epoch_encoder_dataframe = ReadEpochEncoderFile(metadata)
-    if epoch_encoder_dataframe is not None:
-        blk.segments[0].epochs += CreateNeoEpochsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
-        blk.segments[0].events += CreateNeoEventsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
+    blk.segments[0].epochs += CreateNeoEpochsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
+    blk.segments[0].events += CreateNeoEventsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
 
     # classify spikes by amplitude
     blk.segments[0].spiketrains += RunAmplitudeDiscriminators(metadata, blk)
 
     # read in spikes identified by spike sorting using tridesclous
+    t_start = blk.segments[0].analogsignals[0].t_start
+    t_stop = blk.segments[0].analogsignals[0].t_stop
+    sampling_period = blk.segments[0].analogsignals[0].sampling_period
     spikes_dataframe = ReadSpikesFile(metadata, blk)
-    if spikes_dataframe is not None:
-        # assuming all AnalogSignals have the same time properties
-        t_start = blk.segments[0].analogsignals[0].t_start
-        t_stop = blk.segments[0].analogsignals[0].t_stop
-        sampling_period = blk.segments[0].analogsignals[0].sampling_period
+    blk.segments[0].spiketrains += CreateNeoSpikeTrainsFromDataframe(spikes_dataframe, metadata, t_start, t_stop, sampling_period)
 
-        # read in spikes identified by spike sorting
-        blk.segments[0].spiketrains += CreateNeoSpikeTrainsFromDataframe(spikes_dataframe, metadata, t_start, t_stop, sampling_period)
-    else:
-        # otherwise load fake data as a demo
-        if fake_data_for_testing:
-            blk.segments[0].spiketrains += [fake_neo('SpikeTrain') for _ in range(5)]
+    if fake_data_for_testing:
+        # load fake data as a demo
+        blk.segments[0].epochs += [fake_neo('Epoch') for _ in range(5)]
+        blk.segments[0].events += [fake_neo('Event') for _ in range(5)]
+        blk.segments[0].spiketrains += [fake_neo('SpikeTrain') for _ in range(5)]
 
     return blk
 
@@ -238,22 +230,24 @@ def CreateNeoEpochsFromDataframe(dataframe, metadata, file_origin):
 
     epochs_list = []
 
-    # keep only rows with a positive duration
-    dataframe = dataframe[dataframe['Duration (s)'] > 0]
+    if dataframe is not None:
 
-    # group epochs by type
-    for type_name, df in dataframe.groupby('Type'):
+        # keep only rows with a positive duration
+        dataframe = dataframe[dataframe['Duration (s)'] > 0]
 
-        # create a Neo Epoch for each type
-        epoch = neo.Epoch(
-            name = type_name,
-            file_origin = file_origin,
-            times = df['Start (s)'].values * pq.s,
-            durations = df['Duration (s)'].values * pq.s,
-            labels = df['Label'].values,
-        )
+        # group epochs by type
+        for type_name, df in dataframe.groupby('Type'):
 
-        epochs_list.append(epoch)
+            # create a Neo Epoch for each type
+            epoch = neo.Epoch(
+                name = type_name,
+                file_origin = file_origin,
+                times = df['Start (s)'].values * pq.s,
+                durations = df['Duration (s)'].values * pq.s,
+                labels = df['Label'].values,
+            )
+
+            epochs_list.append(epoch)
 
     # return the list of Neo Epochs
     return epochs_list
@@ -265,18 +259,20 @@ def CreateNeoEventsFromDataframe(dataframe, metadata, file_origin):
 
     events_list = []
 
-    # group events by type
-    for type_name, df in dataframe.groupby('Type'):
+    if dataframe is not None:
 
-        # create a Neo Event for each type
-        event = neo.Event(
-            name = type_name,
-            file_origin = file_origin,
-            times = df['Start (s)'].values * pq.s,
-            labels = df['Label'].values,
-        )
+        # group events by type
+        for type_name, df in dataframe.groupby('Type'):
 
-        events_list.append(event)
+            # create a Neo Event for each type
+            event = neo.Event(
+                name = type_name,
+                file_origin = file_origin,
+                times = df['Start (s)'].values * pq.s,
+                labels = df['Label'].values,
+            )
+
+            events_list.append(event)
 
     # return the list of Neo Events
     return events_list
@@ -288,24 +284,26 @@ def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, samp
 
     spikes_list = []
 
-    # group spikes by cluster label
-    for spike_label, df in dataframe.groupby('label'):
+    if dataframe is not None:
 
-        # look up the channels that this unit was found on
-        channels = metadata['tridesclous_channels'][spike_label]
+        # group spikes by cluster label
+        for spike_label, df in dataframe.groupby('label'):
 
-        # create a Neo SpikeTrain for each cluster label
-        st = neo.SpikeTrain(
-            name = str(spike_label),
-            file_origin = abs_path(metadata, 'tridesclous_file'),
-            channels = channels, # custom annotation
-            amplitude = None,    # custom annotation
-            times = t_start + sampling_period * df['index'].values,
-            t_start = t_start,
-            t_stop = t_stop,
-        )
+            # look up the channels that this unit was found on
+            channels = metadata['tridesclous_channels'][spike_label]
 
-        spikes_list.append(st)
+            # create a Neo SpikeTrain for each cluster label
+            st = neo.SpikeTrain(
+                name = str(spike_label),
+                file_origin = abs_path(metadata, 'tridesclous_file'),
+                channels = channels, # custom annotation
+                amplitude = None,    # custom annotation
+                times = t_start + sampling_period * df['index'].values,
+                t_start = t_start,
+                t_stop = t_stop,
+            )
+
+            spikes_list.append(st)
 
     return spikes_list
 
