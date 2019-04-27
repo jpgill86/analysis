@@ -14,6 +14,7 @@ import ipywidgets
 
 from ParseMetadata import abs_path
 from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
+from NeoUtilities import NeoEpochToDataFrame
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
 
@@ -105,7 +106,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ('data_frame',    {'value': False, 'icon': 'table',        'description': 'Annotation Table'}),
     ])
 
-    def __init__(self, metadata, blk, rauc_sigs = None, annotations_dataframe = None):
+    def __init__(self, metadata, blk, rauc_sigs = None):
         '''
 
         '''
@@ -113,7 +114,6 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         self.metadata = metadata
         self.blk = blk
         self.rauc_sigs = rauc_sigs
-        self.annotations_dataframe = annotations_dataframe
 
         # initialize the box
         super(ipywidgets.HBox, self).__init__()
@@ -161,9 +161,9 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             self.disable(name)
 
     def _on_launch_clicked(self, button):
-        self.launch_ephyviewer(self.metadata, self.blk, self.rauc_sigs, self.annotations_dataframe)
+        self.launch_ephyviewer(self.metadata, self.blk, self.rauc_sigs)
 
-    def launch_ephyviewer(self, metadata, blk, rauc_sigs = None, annotations_dataframe = None):
+    def launch_ephyviewer(self, metadata, blk, rauc_sigs = None):
         '''
 
         '''
@@ -394,7 +394,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # DATAFRAME
 
-        if self.is_enabled('data_frame') and annotations_dataframe is not None:
+        annotations_dataframe = NeoEpochToDataFrame(seg.epochs, exclude_epoch_encoder_epochs=True)
+        if self.is_enabled('data_frame') and len(annotations_dataframe) > 0:
 
             data_frame_view = ephyviewer.DataFrameView(source = annotations_dataframe, name = 'table')
             if 'events' in win.viewers:
