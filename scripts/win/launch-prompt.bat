@@ -1,9 +1,20 @@
-@SET CONDAROOT=%USERPROFILE%\Miniconda3
+@ECHO OFF
 
-@SET CONDAENV=analysis
+SET CONDAENV=analysis
 
-@CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
+IF EXIST %USERPROFILE%\Anaconda3 (
+  SET CONDAROOT=%USERPROFILE%\Anaconda3
+) ELSE (
+IF EXIST %USERPROFILE%\Miniconda3 (
+  SET CONDAROOT=%USERPROFILE%\Miniconda3
+) ELSE (
+  ECHO ERROR: Could not find the conda root directory!
+  PAUSE
+  EXIT
+))
 
-@cd "%~dp0..\.."
+CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-@cmd
+CD "%~dp0..\.."
+
+CMD

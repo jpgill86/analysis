@@ -1,8 +1,8 @@
 #!/bin/bash
 
-CONDAROOT=~/miniconda3
-
 CONDAENV=analysis
+
+CONDAROOT=$(dirname $(which conda))/..
 
 source $CONDAROOT/etc/profile.d/conda.sh
 
