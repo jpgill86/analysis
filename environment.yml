@@ -5,6 +5,8 @@ dependencies:
   - av
   - ipywidgets
   - matplotlib
+  - nbdime       # optional: nbdime extensions --enable
+  - nbstripout   # optional: nbstripout --install
   - notebook
   - numpy
   - pandas
