@@ -7,7 +7,7 @@ Installing dependencies
 You will need access to these commands on the command line:
 
 - ``conda`` (Anaconda_ or Miniconda_ with Python 3)
-- ``git`` (git-scm.com_)
+- ``git`` (``conda install git`` or git-scm.com_)
 
 Download this source code, either manually through GitHub_ or using ``git``::
 
@@ -19,11 +19,14 @@ On the command line, navigate to the top-level directory::
 
 Create a new conda environment::
 
-    conda env create -f environment.yml -n <envname>
+    conda env create -f environment.yml -n analysis
 
-where ``<envname>`` can be anything you like, or update an existing one::
+or update an existing one::
 
-    conda env update -f environment.yml -n <envname>
+    conda env update -f environment.yml -n analysis
+
+Instead of ``analysis``, you could use any environment name you like, but the
+scripts in the ``scripts`` directory assume this is your enviroment name.
 
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://docs.conda.io/en/latest/miniconda.html
@@ -35,19 +38,27 @@ Getting started
 
 Activate your conda environment and launch Jupyter notebook::
 
-    conda activate <envname>
+    conda activate analysis
     jupyter notebook
 
 Using the Jupyter file browser, navigate to the ``notebooks`` directory and
 select a Jupyter notebook file (``*.ipynb``) to begin a session.
 
+The ``launch-notebooks`` script located under ``scripts`` can run these
+commands and navigate to the correct directory for you.
+
 Running the ephyviewer example
 ------------------------------
 
-Launch the ``Data Explorer`` notebook located in the top-level ``example``
-directory. Run all cells in order. A Qt-based graphical user interface will
-launch. (Note that this type of GUI cannot be launched from a Jupyter server
-running on a remote computer, such as with MyBinder.org.)
+Follow the steps given above but navigate to the ``example`` directory instead
+and launch the ``Data Explorer`` notebook.
+
+Alternatively, run the ``launch-example`` script located under ``scripts`` to
+accomplish the same thing.
+
+After the notebook opens, run all cells in order. A Qt-based graphical user
+interface will launch. (Note that this type of GUI cannot be launched from a
+Jupyter server running on a remote computer, such as with MyBinder.org.)
 
 .. image:: example/ephyviewer-screenshot.png
 
