@@ -15,6 +15,7 @@ import ipywidgets
 from ParseMetadata import abs_path
 from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
 from NeoUtilities import NeoEpochToDataFrame
+from MyWritableEpochSource import MyWritableEpochSource
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
 
@@ -356,7 +357,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         if self.is_enabled('epoch_encoder') and self.metadata['epoch_encoder_file'] is not None:
 
-            writable_epoch_source = ephyviewer.CsvEpochSource(
+            writable_epoch_source = MyWritableEpochSource(
                 filename = abs_path(self.metadata, 'epoch_encoder_file'),
                 possible_labels = self.metadata['epoch_encoder_possible_labels'],
             )
