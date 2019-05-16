@@ -100,7 +100,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ('traces_rauc',   {'value': False, 'icon': 'area-chart',   'description': 'RAUC'}),
         # ('freqs',         {'value': False, 'icon': 'wifi',         'description': 'Frequencies'}),
         ('spike_trains',  {'value': True,  'icon': 'barcode',      'description': 'Spike Trains'}),
-        ('epochs',        {'value': True,  'icon': 'align-left',   'description': 'Annotation Epochs'}),
+        ('epochs',        {'value': True,  'icon': 'align-left',   'description': 'Read-Only Epochs'}),
         ('epoch_encoder', {'value': True,  'icon': 'align-left',   'description': 'Epoch Encoder'}),
         ('video',         {'value': True,  'icon': 'youtube-play', 'description': 'Video'}),
         ('event_list',    {'value': True,  'icon': 'list',         'description': 'Events'}),
@@ -124,6 +124,34 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         for name, kwargs in self._toggle_button_defaults.items():
             self.controls[name] = ipywidgets.ToggleButton(**kwargs)
         controls_vbox = ipywidgets.VBox(list(self.controls.values()))
+
+        # permanently disable controls for which inputs are missing
+        if not self.rauc_sigs:
+            self.controls['traces_rauc'].value = False
+            self.controls['traces_rauc'].disabled = True
+            self.controls['traces_rauc'].tooltip = 'Cannot enable because rauc_sigs is empty'
+        if not self.blk.segments[0].spiketrains:
+            self.controls['spike_trains'].value = False
+            self.controls['spike_trains'].disabled = True
+            self.controls['spike_trains'].tooltip = 'Cannot enable because there are no spike trains'
+        if not [ep for ep in self.blk.segments[0].epochs if '(from epoch encoder file)' not in ep.labels]:
+            self.controls['epochs'].value = False
+            self.controls['epochs'].disabled = True
+            self.controls['epochs'].tooltip = 'Cannot enable because there are no read-only epochs'
+            self.controls['event_list'].value = False
+            self.controls['event_list'].disabled = True
+            self.controls['event_list'].tooltip = 'Cannot enable because there are no read-only epochs'
+            self.controls['data_frame'].value = False
+            self.controls['data_frame'].disabled = True
+            self.controls['data_frame'].tooltip = 'Cannot enable because there are no read-only epochs'
+        if not self.metadata['epoch_encoder_file']:
+            self.controls['epoch_encoder'].value = False
+            self.controls['epoch_encoder'].disabled = True
+            self.controls['epoch_encoder'].tooltip = 'Cannot enable because epoch_encoder_file is not set'
+        if not self.metadata['video_file']:
+            self.controls['video'].value = False
+            self.controls['video'].disabled = True
+            self.controls['video'].tooltip = 'Cannot enable because video_file is not set'
 
         # create the launch button
         self.launch_button = ipywidgets.Button(icon='rocket', description='Launch', layout=ipywidgets.Layout(height='auto'))
