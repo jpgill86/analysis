@@ -31,24 +31,14 @@ class MyWritableEpochSource(WritableEpochSource):
 
         if os.path.exists(self.filename):
             # if file already exists, load previous epoch
-            try:
-                df = pd.read_csv(self.filename,  index_col=None, dtype={
-                    'Start (s)': 'float64',
-                    'End (s)':   'float64',
-                    'Type':      'U'})
-                epoch = {'time':     df['Start (s)'].values,
-                         'duration': df['End (s)'].values - df['Start (s)'].values,
-                         'label':    df['Type'].values,
-                         'name':     self.channel_name}
-            except Exception:
-                df = pd.read_csv(self.filename,  index_col=None, dtype={
-                    'time':     'float64',
-                    'duration': 'float64',
-                    'label':    'U'})
-                epoch = {'time':     df['time'].values,
-                         'duration': df['duration'].values,
-                         'label':    df['label'].values,
-                         'name':     self.channel_name}
+            df = pd.read_csv(self.filename,  index_col=None, dtype={
+                'Start (s)': 'float64',
+                'End (s)':   'float64',
+                'Type':      'U'})
+            epoch = {'time':     df['Start (s)'].values,
+                     'duration': df['End (s)'].values - df['Start (s)'].values,
+                     'label':    df['Type'].values,
+                     'name':     self.channel_name}
         else:
             # if file does NOT already exist, use superclass method for creating
             # an empty dictionary

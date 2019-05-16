@@ -138,114 +138,59 @@ def ReadEpochEncoderFile(metadata):
 
     else:
 
-        try:
-            # data types for each column in the file
-            dtypes = {
-                'Start (s)': float,
-                'End (s)':   float,
-                'Type':      str,
-            }
+        # data types for each column in the file
+        dtypes = {
+            'Start (s)': float,
+            'End (s)':   float,
+            'Type':      str,
+        }
 
-            # parse the file and create a dataframe
-            df = pd.read_csv(abs_path(metadata, 'epoch_encoder_file'), dtype = dtypes)
+        # parse the file and create a dataframe
+        df = pd.read_csv(abs_path(metadata, 'epoch_encoder_file'), dtype = dtypes)
 
-            # increment row labels by 2 so they match the source file
-            # which is 1-indexed and has a header
-            df.index += 2
+        # increment row labels by 2 so they match the source file
+        # which is 1-indexed and has a header
+        df.index += 2
 
-            # discard entries with missing or negative start times
-            bad_start = df['Start (s)'].isnull() | (df['Start (s)'] < 0)
-            if bad_start.any():
-                print('NOTE: These rows will be discarded because their Start times are missing or negative:')
-                print(df[bad_start])
-                df = df[~bad_start]
+        # discard entries with missing or negative start times
+        bad_start = df['Start (s)'].isnull() | (df['Start (s)'] < 0)
+        if bad_start.any():
+            print('NOTE: These rows will be discarded because their Start times are missing or negative:')
+            print(df[bad_start])
+            df = df[~bad_start]
 
-            # discard entries with end time preceding start time
-            bad_end = df['End (s)'] < df['Start (s)']
-            if bad_end.any():
-                print('NOTE: These rows will be discarded because their End times precede their Start times:')
-                print(df[bad_end])
-                df = df[~bad_end]
+        # discard entries with end time preceding start time
+        bad_end = df['End (s)'] < df['Start (s)']
+        if bad_end.any():
+            print('NOTE: These rows will be discarded because their End times precede their Start times:')
+            print(df[bad_end])
+            df = df[~bad_end]
 
-            # compute durations
-            df.insert(
-                column = 'Duration (s)',
-                value = df['End (s)'] - df['Start (s)'],
-                loc = 2, # insert after 'End (s)'
-            )
+        # compute durations
+        df.insert(
+            column = 'Duration (s)',
+            value = df['End (s)'] - df['Start (s)'],
+            loc = 2, # insert after 'End (s)'
+        )
 
-            # replace some NaNs
-            df.fillna({
-                'Duration (s)': 0,
-                'Type': 'Other',
-            }, inplace = True)
+        # replace some NaNs
+        df.fillna({
+            'Duration (s)': 0,
+            'Type': 'Other',
+        }, inplace = True)
 
-            # sort entries by time
-            df.sort_values([
-                'Start (s)',
-                'Duration (s)',
-            ], inplace = True)
+        # sort entries by time
+        df.sort_values([
+            'Start (s)',
+            'Duration (s)',
+        ], inplace = True)
 
-            # add 'Label' column to indicate where these epochs came from
-            df.insert(
-                column = 'Label',
-                value = '(from epoch encoder file)',
-                loc = 4, # insert after 'Type'
-            )
-
-        except Exception:
-            # data types for each column in the file
-            dtypes = {
-                'time':     float,
-                'duration': float,
-                'label':    str,
-            }
-
-            # parse the file and create a dataframe
-            df = pd.read_csv(abs_path(metadata, 'epoch_encoder_file'), dtype = dtypes)
-
-            # increment row labels by 2 so they match the source file
-            # which is 1-indexed and has a header
-            df.index += 2
-
-            # discard entries with missing or negative start times
-            bad_time = df['time'].isnull() | (df['time'] < 0)
-            if bad_time.any():
-                print('NOTE: These rows will be discarded because their times are missing or negative:')
-                print(df[bad_time])
-                df = df[~bad_time]
-
-            # discard entries with missing or negative duration
-            bad_duration = df['duration'].isnull() | (df['duration'] < 0)
-            if bad_duration.any():
-                print('NOTE: These rows will be discarded because their durations are missing or negative:')
-                print(df[bad_duration])
-                df = df[~bad_duration]
-
-            # compute end times
-            df.insert(
-                column = 'End (s)',
-                value = df['time'] + df['duration'],
-                loc = 1, # insert after 'start'
-            )
-
-            # sort entries by time
-            df.sort_values([
-                'time',
-                'duration',
-            ], inplace = True)
-
-            # change column names, including renaming epoch encoder's 'label' to 'Type'
-            df = df.rename(
-                index = str,
-                columns = {'time': 'Start (s)', 'duration': 'Duration (s)', 'label': 'Type'})
-
-            # add 'Label' column to indicate where these epochs came from
-            df.insert(
-                column = 'Label',
-                value = '(from epoch encoder file)',
-                loc = 4, # insert after 'Type'
-            )
+        # add 'Label' column to indicate where these epochs came from
+        df.insert(
+            column = 'Label',
+            value = '(from epoch encoder file)',
+            loc = 4, # insert after 'Type'
+        )
 
         # return the dataframe
         return df
