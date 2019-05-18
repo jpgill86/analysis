@@ -278,11 +278,11 @@ class MetadataSelector(ipywidgets.VBox):
             filenames = [k for k in metadata if k.endswith('_file') and metadata[k] is not None]
             files_exist = [os.path.exists(abs_path(metadata, file)) for file in filenames]
             if all(files_exist):
-                has_local_data[key] = '⏺'
+                has_local_data[key] = '◆'
             elif any(files_exist):
-                has_local_data[key] = '⨀'
+                has_local_data[key] = '⬖'
             else:
-                has_local_data[key] = '⭘'
+                has_local_data[key] = '◇'
 
         # indicate lack of video_offset with an exclamation point
         has_video_offset = {}
