@@ -140,6 +140,13 @@ def _defaults_for_key(key):
         # the video time offset in seconds
         'video_offset': None,
 
+        # list of ordered pairs specifying times and durations that the ephys
+        # data collection was paused while the video continued recording
+        # - e.g. [[60, 10], [120, 10], [240, 10]] for three 10-second pauses
+        #   occurring at times 1:00, 2:00, 3:00 according to the daq, which
+        #   would correspond to times 1:00, 2:10, 3:20 according to the video
+        'video_jumps': None,
+
         # list the channels in the order they should be plotted
         # - e.g. [{'channel': 'Channel A', 'ylabel': 'My channel', 'ylim': [-120, 120], 'units': 'uV'}, ...]
         'plots': None,

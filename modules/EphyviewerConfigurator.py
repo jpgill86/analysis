@@ -406,6 +406,26 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 video_source._t_start = max(min(video_source.t_starts), 0)
                 video_source._t_stop  = max(video_source.t_stops)
 
+            if self.metadata['video_jumps'] is not None:
+
+                # create an unmodified video_times vector with evenly spaced times
+                video_times = np.arange(video_source.nb_frames[0])/video_source.rates[0] + video_source.t_starts[0]
+
+                # insert repeating times at pause_start to fill pause_duration
+                # so that that section of the video is skipped over
+                for pause_start, pause_duration in self.metadata['video_jumps']:
+                    pause_start_index = np.searchsorted(video_times, pause_start)
+                    pause_fill = video_times[pause_start_index] * np.ones(int(np.round(pause_duration*video_source.rates[0])))
+                    video_times = np.insert(video_times, pause_start_index, pause_fill)
+                    video_times = video_times[:video_source.nb_frames[0]]
+
+                # add the modified video_times to the video_source
+                video_source.video_times = [video_times]
+                video_source.t_starts[0] = min(video_times)
+                video_source.t_stops[0]  = max(video_times)
+                video_source._t_start = max(min(video_source.t_starts), 0)
+                video_source._t_stop  = max(video_source.t_stops)
+
             video_view = ephyviewer.VideoViewer(source = video_source, name = 'video')
             win.add_view(video_view, location = 'bottom', orientation = 'horizontal')
 
