@@ -134,16 +134,17 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             self.controls['spike_trains'].value = False
             self.controls['spike_trains'].disabled = True
             self.controls['spike_trains'].tooltip = 'Cannot enable because there are no spike trains'
-        if not [ep for ep in self.blk.segments[0].epochs if '(from epoch encoder file)' not in ep.labels]:
+        if not [ep for ep in self.blk.segments[0].epochs if ep.size > 0 and '(from epoch encoder file)' not in ep.labels]:
             self.controls['epochs'].value = False
             self.controls['epochs'].disabled = True
             self.controls['epochs'].tooltip = 'Cannot enable because there are no read-only epochs'
-            self.controls['event_list'].value = False
-            self.controls['event_list'].disabled = True
-            self.controls['event_list'].tooltip = 'Cannot enable because there are no read-only epochs'
             self.controls['data_frame'].value = False
             self.controls['data_frame'].disabled = True
             self.controls['data_frame'].tooltip = 'Cannot enable because there are no read-only epochs'
+            if not [ev for ev in self.blk.segments[0].events if ev.size > 0]:
+                self.controls['event_list'].value = False
+                self.controls['event_list'].disabled = True
+                self.controls['event_list'].tooltip = 'Cannot enable because there are no read-only epochs or events'
         if not self.metadata['epoch_encoder_file']:
             self.controls['epoch_encoder'].value = False
             self.controls['epoch_encoder'].disabled = True
@@ -205,10 +206,10 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         sources = NeoSegmentToEphyviewerSources(seg)
         # sources = ephyviewer.get_sources_from_neo_segment(seg)
 
-        # filter epoch encoder data out of generic epoch and event lists
-        # so they are not presented multiple times
-        sources['epoch'][0].all = [ep for ep in sources['epoch'][0].all if '(from epoch encoder file)' not in ep['label']]
-        sources['event'][0].all = [ev for ev in sources['event'][0].all if '(from epoch encoder file)' not in ev['label']]
+        # filter epoch encoder data out of read-only epoch and event lists
+        # so they are not presented multiple times, and remove empty channels
+        sources['epoch'][0].all = [ep for ep in sources['epoch'][0].all if len(ep['time']) > 0 and '(from epoch encoder file)' not in ep['label']]
+        sources['event'][0].all = [ev for ev in sources['event'][0].all if len(ev['time']) > 0 and '(from epoch encoder file)' not in ev['label']]
 
         ########################################################################
         # APP AND WINDOW
