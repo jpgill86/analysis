@@ -13,17 +13,18 @@ import neo
 from ParseMetadata import abs_path
 from neo.test.generate_datasets import fake_neo
 
-def LoadAndPrepareData(metadata, fake_data_for_testing = False):
+def LoadAndPrepareData(metadata, lazy=False, fake_data_for_testing = False):
     '''
 
     '''
 
     # read in the electrophysiology data
-    blk = ReadDataFile(metadata)
+    blk = ReadDataFile(metadata, lazy)
     # blk = CreateNeoBlockExample()
 
-    # apply filters to signals
-    blk = ApplyFilters(metadata, blk)
+    # apply filters to signals if not using lazy loading of signals
+    if not lazy:
+        blk = ApplyFilters(metadata, blk)
 
     # read in annotations
     annotations_dataframe = ReadAnnotationsFile(metadata)
@@ -35,8 +36,9 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
     blk.segments[0].epochs += CreateNeoEpochsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
     blk.segments[0].events += CreateNeoEventsFromDataframe(epoch_encoder_dataframe, metadata, abs_path(metadata, 'epoch_encoder_file'))
 
-    # classify spikes by amplitude
-    blk.segments[0].spiketrains += RunAmplitudeDiscriminators(metadata, blk)
+    # classify spikes by amplitude if not using lazy loading of signals
+    if not lazy:
+        blk.segments[0].spiketrains += RunAmplitudeDiscriminators(metadata, blk)
 
     # read in spikes identified by spike sorting using tridesclous
     t_start = blk.segments[0].analogsignals[0].t_start
@@ -53,14 +55,32 @@ def LoadAndPrepareData(metadata, fake_data_for_testing = False):
 
     return blk
 
-def ReadDataFile(metadata):
+def ReadDataFile(metadata, lazy=False):
     '''
 
     '''
 
     # read in the electrophysiology data
     io = neo.io.get_io(abs_path(metadata, 'data_file'))
-    blk = io.read_block()
+    blk = io.read_block(lazy=lazy)
+
+    # load all proxy objects except analog signals,
+    # and convert byte labels to Unicode strings
+    if lazy:
+        for i in range(len(blk.segments[0].epochs)):
+            epoch = blk.segments[0].epochs[i]
+            if hasattr(epoch, 'load'):
+                blk.segments[0].epochs[i] = epoch.load()
+                blk.segments[0].epochs[i].labels = blk.segments[0].epochs[i].labels.astype('U')
+        for i in range(len(blk.segments[0].events)):
+            event = blk.segments[0].events[i]
+            if hasattr(event, 'load'):
+                blk.segments[0].events[i] = event.load()
+                blk.segments[0].events[i].labels = blk.segments[0].events[i].labels.astype('U')
+        for i in range(len(blk.segments[0].spiketrains)):
+            spiketrain = blk.segments[0].spiketrains[i]
+            if hasattr(spiketrain, 'load'):
+                blk.segments[0].spiketrains[i] = spiketrain.load()
 
     return blk
 

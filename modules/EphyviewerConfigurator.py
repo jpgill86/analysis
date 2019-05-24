@@ -13,7 +13,6 @@ import ephyviewer
 import ipywidgets
 
 from ParseMetadata import abs_path
-from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
 from NeoUtilities import EstimateVideoJumpTimes, NeoEpochToDataFrame
 from MyWritableEpochSource import MyWritableEpochSource
 
@@ -107,7 +106,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ('data_frame',    {'value': False, 'icon': 'table',        'description': 'Annotation Table'}),
     ])
 
-    def __init__(self, metadata, blk, rauc_sigs = None):
+    def __init__(self, metadata, blk, rauc_sigs = None, lazy = False):
         '''
 
         '''
@@ -115,6 +114,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         self.metadata = metadata
         self.blk = blk
         self.rauc_sigs = rauc_sigs
+        self.lazy = lazy
 
         # initialize the box
         super(ipywidgets.HBox, self).__init__()
@@ -205,7 +205,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
     def enable_all(self):
         for name in self.controls:
-            self.enable(name)
+            if not self.controls[name].disabled:
+                self.enable(name)
 
     def disable_all(self):
         for name in self.controls:
@@ -224,8 +225,11 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         seg = self.blk.segments[0]
         sigs = seg.analogsignals
-        sources = NeoSegmentToEphyviewerSources(seg)
-        # sources = ephyviewer.get_sources_from_neo_segment(seg)
+
+        sources = {'signal': [], 'epoch': [], 'event': [], 'spike': []}
+        sources['epoch'].append(ephyviewer.NeoEpochSource(seg.epochs))
+        sources['event'].append(ephyviewer.NeoEventSource(seg.events))
+        sources['spike'].append(ephyviewer.NeoSpikeTrainSource(seg.spiketrains))
 
         # filter epoch encoder data out of read-only epoch and event lists
         # so they are not presented multiple times, and remove empty channels
@@ -257,36 +261,44 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         ########################################################################
         # PREPARE SCATTER PLOT PARAMETERS
 
-        all_times = sigs[0].times.rescale('s').magnitude # assuming all AnalogSignals have the same sampling rate and start time
-        spike_indices = {}
-        spike_channels = {}
-        for st in seg.spiketrains:
-            if 'channels' in st.annotations:
-                c = []
-                for channel in st.annotations['channels']:
-                    index = plotNameToIndex.get(channel, None)
-                    if index is None:
-                        print('Note: Spike train {} will not be plotted on channel {} because that channel isn\'t being plotted'.format(st.name, channel))
-                    else:
-                        c.append(index)
-                if c:
-                    spike_channels[st.name] = c
-                    spike_indices[st.name] = np.where(np.isin(all_times, st.times.magnitude))[0]
+        if not self.lazy:
+            all_times = sigs[0].times.rescale('s').magnitude # assuming all AnalogSignals have the same sampling rate and start time
+            spike_indices = {}
+            spike_channels = {}
+            for st in seg.spiketrains:
+                if 'channels' in st.annotations:
+                    c = []
+                    for channel in st.annotations['channels']:
+                        index = plotNameToIndex.get(channel, None)
+                        if index is None:
+                            print('Note: Spike train {} will not be plotted on channel {} because that channel isn\'t being plotted'.format(st.name, channel))
+                        else:
+                            c.append(index)
+                    if c:
+                        spike_channels[st.name] = c
+                        spike_indices[st.name] = np.where(np.isin(all_times, st.times.magnitude))[0]
 
         ########################################################################
         # TRACES WITH SCATTER PLOTS
 
         if self.is_enabled('traces'):
 
-            sig_source = ephyviewer.AnalogSignalSourceWithScatter(
-                signals = np.concatenate([sigs[p['index']].as_array(p['units']) for p in self.metadata['plots']], axis = 1),
-                sample_rate = sigs[0].sampling_rate, # assuming all AnalogSignals have the same sampling rate
-                t_start = sigs[0].t_start,           # assuming all AnalogSignals start at the same time
-                channel_names = [p['ylabel'] for p in self.metadata['plots']],
-                scatter_indexes = spike_indices,
-                scatter_channels = spike_channels,
-            )
-            sources['signal'] = [sig_source]
+            if self.lazy:
+                import neo
+                neorawio = neo.rawio.AxographRawIO(abs_path(self.metadata, 'data_file')) # TODO detect correct RawIO
+                neorawio.parse_header()
+                channel_indexes = [p['index'] for p in self.metadata['plots']]
+                sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
+                # TODO apply ylabels
+            else:
+                sources['signal'].append(ephyviewer.AnalogSignalSourceWithScatter(
+                    signals = np.concatenate([sigs[p['index']].magnitude for p in self.metadata['plots']], axis = 1),
+                    sample_rate = sigs[0].sampling_rate, # assuming all AnalogSignals have the same sampling rate
+                    t_start = sigs[0].t_start,           # assuming all AnalogSignals start at the same time
+                    channel_names = [p['ylabel'] for p in self.metadata['plots']],
+                    scatter_indexes = spike_indices,
+                    scatter_channels = spike_channels,
+                ))
 
             trace_view = ephyviewer.TraceViewer(source = sources['signal'][0], name = 'signals')
             trace_view.params['scatter_size'] = 5
@@ -304,8 +316,11 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             trace_view.params['ylim_min'] = -trace_view.source.nb_channel + 0.5
             trace_view.params['scale_mode'] = 'by_channel'
             for i, p in enumerate(self.metadata['plots']):
-                ylim_span = np.ptp(p['ylim'])
-                ylim_center = np.mean(p['ylim'])
+                sig_units = sigs[p['index']].units
+                units_ratio = (pq.Quantity(1, p['units'])/pq.Quantity(1, sig_units)).simplified
+                assert units_ratio.dimensionality.string == 'dimensionless', f"Channel \"{p['channel']}\" has units {sig_units} and cannot be converted to {p['units']}"
+                ylim_span = np.ptp(p['ylim'] * units_ratio.magnitude)
+                ylim_center = np.mean(p['ylim'] * units_ratio.magnitude)
                 trace_view.by_channel_params['ch{}'.format(i), 'gain'] = 1/ylim_span # rescale [ymin,ymax] across a unit
                 trace_view.by_channel_params['ch{}'.format(i), 'offset'] = -i - ylim_center/ylim_span # center [ymin,ymax] within the unit
 
