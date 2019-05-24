@@ -3,6 +3,7 @@ channels:
   - defaults
 dependencies:
   - av
+  - git
   - ipywidgets
   - matplotlib
   - nbdime       # optional: nbdime extensions --enable
