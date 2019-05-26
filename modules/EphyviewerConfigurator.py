@@ -14,7 +14,7 @@ import ipywidgets
 
 from ParseMetadata import abs_path
 from NeoToEphyviewerBridge import NeoSegmentToEphyviewerSources
-from NeoUtilities import NeoEpochToDataFrame
+from NeoUtilities import EstimateVideoJumpTimes, NeoEpochToDataFrame
 from MyWritableEpochSource import MyWritableEpochSource
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
@@ -160,6 +160,27 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         # populate the box
         self.children = [controls_vbox, self.launch_button]
+
+        # warn about potential video sync problems
+        if metadata['video_file'] and not metadata['video_offset']:
+            print('WARNING: Your video will likely be out of sync with your')
+            print('data because video_offset is unspecified! Consider adding')
+            print('it to your metadata.')
+        if metadata['video_file'] and not metadata['video_jumps']:
+            approx_video_jumps = EstimateVideoJumpTimes(blk)
+            if approx_video_jumps:
+                print('WARNING: It seems that AxoGraph was paused at least once')
+                print('during data acquisition, but video_jumps is unspecified.')
+                print('This will cause your video and data to get out of sync.')
+                print('Consider adding the following to your metadata:')
+                print('    video_jumps:')
+                for t, dur in approx_video_jumps:
+                    print(f'        - [{t}, {dur}]')
+                print('Each ordered pair specifies the timing of a pause and')
+                print('approximately how long the pause lasted in seconds. The')
+                print('pause durations are only rough estimates +/- a second! You')
+                print('should refine them by inspecting the video to make sure')
+                print('your sync is accurate!')
 
     def is_enabled(self, name):
         '''
