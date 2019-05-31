@@ -154,26 +154,34 @@ def _defaults_for_key(key):
 
     return defaults
 
-def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root = None):
+def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root = None):
     '''
     Read metadata stored in a YAML file about available collections of data,
-    assign defaults to missing values, and resolve absolute paths for local
+    assign defaults to missing parameters, and resolve absolute paths for local
     data stores and full URLs for remote data stores.
 
-    The "data_dir" property must be provided for every data set and specifies
-    the directory on the local system containing the data files. "data_dir" may
-    be an absolute path or a relative path with respect to `local_data_root`.
-    If it is a relative path, it will be converted to an absolute path.
+    `local_data_root` must be an absolute or relative path on the local system,
+    or None. If it is a relative path, it is relative to the current working
+    directory. If it is None, its value defaults to the directory containing
+    `file`.
 
-    The "remote_data_dir" property is optional and specifies the directory on a
-    remote server containing the data files. "remote_data_dir" may be a full
-    URL or a relative path with respect to `remote_data_root`, which must be a
-    full URL. If it is a relative path, it will be converted to a full URL.
+    `remote_data_root` must be a full URL or None. If it is None, `file` will
+    be checked for a fallback value. "remote_data_root" may be provided in the
+    YAML file as a special entry with no child properties. Any non-None value
+    passed to this function will override the value provided in the file. If
+    both are unspecified, it is assumed that no remote data store exists.
 
-    Instead of passing it as an argument to this function, "remote_data_root"
-    may be provided in the file as a special entry with no child properties.
-    Any non-None value passed to this function will override the value provided
-    in the file.
+    The "data_dir" property must be provided for every data set in `file` and
+    specifies the directory on the local system containing the data files.
+    "data_dir" may be an absolute path or a relative path with respect to
+    `local_data_root`. If it is a relative path, it will be converted to an
+    absolute path.
+
+    The "remote_data_dir" property is optional for every data set in `file` and
+    specifies the directory on a remote server containing the data files.
+    "remote_data_dir" may be a full URL or a relative path with respect to
+    `remote_data_root`. If it is a relative path, it will be converted to a
+    full URL.
 
     File paths (e.g., "data_file", "video_file") are assumed to be relative to
     both "data_dir" and "remote_data_dir" (i.e., the local and remote data
@@ -181,11 +189,15 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = '.', remote_data_root 
     `abs_url`.
     '''
 
+    # local_data_root defaults to the directory containing file
+    if local_data_root is None:
+        local_data_root = os.path.dirname(file)
+
     # load metadata from file
     with open(file) as f:
         md = yaml.safe_load(f)
 
-    # remove remote_data_root from the dict if it exists
+    # remove special entry "remote_data_root" from the dict if it exists
     remote_data_root_from_file = md.pop('remote_data_root', None)
 
     # use remote_data_root passed to function preferentially
@@ -264,7 +276,7 @@ class MetadataSelector(ipywidgets.VBox):
     >>> metadata['data_file']
     '''
 
-    def __init__(self, file = 'metadata.yml', local_data_root = '.', remote_data_root = None, initial_selection = None):
+    def __init__(self, file = 'metadata.yml', local_data_root = None, remote_data_root = None, initial_selection = None):
         '''
         Initialize a new MetadataSelector. The metadata file is read at
         initialization.
