@@ -16,6 +16,10 @@ def _download(url, local_file, bytes_per_chunk=1024*8, show_progress=True):
 
     '''
 
+    # create the containing directory if necessary
+    if not os.path.exists(os.path.dirname(local_file)):
+        os.makedirs(os.path.dirname(local_file))
+
     with urllib.request.urlopen(url) as dist:
         with open(local_file, 'wb') as f:
             file_size_in_bytes = int(dist.headers['Content-Length'])
