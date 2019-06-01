@@ -303,10 +303,11 @@ class MetadataSelector(ipywidgets.VBox):
             else:
                 has_local_data[key] = '◇'
 
-        # indicate lack of video_offset with an exclamation point
+        # indicate lack of video_offset with an exclamation point unless there
+        # is no video_file
         has_video_offset = {}
         for key, metadata in self.all_metadata.items():
-            if metadata['video_offset'] is None:
+            if metadata['video_offset'] is None and metadata['video_file'] is not None:
                 has_video_offset[key] = '!'
             else:
                 has_video_offset[key] = ' '
