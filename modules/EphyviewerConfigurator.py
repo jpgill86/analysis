@@ -285,11 +285,12 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
             if self.lazy:
                 import neo
-                neorawio = neo.rawio.AxographRawIO(abs_path(self.metadata, 'data_file')) # TODO detect correct RawIO
+                neorawio = neo.rawio.AxographRawIO(abs_path(self.metadata, 'data_file')) # TODO detect correct RawIO automatically
                 neorawio.parse_header()
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
                 sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
                 # TODO apply ylabels
+                # TODO support scatter
             else:
                 sources['signal'].append(ephyviewer.AnalogSignalSourceWithScatter(
                     signals = np.concatenate([sigs[p['index']].magnitude for p in self.metadata['plots']], axis = 1),
