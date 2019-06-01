@@ -92,7 +92,7 @@ def _defaults_for_key(key):
         # - this may be a full URL or a relative path, or None if there exists
         #   no remote data store
         # - if it is a relative path, it will be interpreted by LoadMetadata as
-        #   relative to remote_data_root and will be convered to a full URL
+        #   relative to remote_data_root and will be converted to a full URL
         'remote_data_dir': None,
 
         # the ephys data file
