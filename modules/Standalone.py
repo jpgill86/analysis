@@ -14,7 +14,7 @@ from EphyviewerConfigurator import EphyviewerConfigurator
 
 class DataExplorer(QT.QMainWindow):
 
-    def __init__(self, lazy=True):
+    def __init__(self, lazy=True, support_increased_line_width=False):
 
         QT.QMainWindow.__init__(self)
 
@@ -23,6 +23,12 @@ class DataExplorer(QT.QMainWindow):
 
         # lazy loading using Neo RawIO
         self.lazy = lazy
+
+        # support_increased_line_width=True eliminates the extremely poor
+        # performance associated with TraceViewer's line_width > 1.0, but it
+        # also degrades overall performance somewhat and uses a mode of
+        # pyqtgraph that is reportedly unstable
+        self.support_increased_line_width = support_increased_line_width
 
         # windows are appended to this list so that they persist after the
         # function that spawned them returns
@@ -90,6 +96,6 @@ class DataExplorer(QT.QMainWindow):
         ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
         # ephyviewer_config.enable_all()
 
-        win = ephyviewer_config.create_ephyviewer_window()
+        win = ephyviewer_config.create_ephyviewer_window(self.support_increased_line_width)
         self.windows.append(win)
         win.show()

@@ -6,6 +6,6 @@ from ephyviewer import mkQApp
 from Standalone import DataExplorer
 
 app = mkQApp()
-win = DataExplorer(lazy=True)
+win = DataExplorer(lazy=True, support_increased_line_width=False)
 win.show()
 app.exec_()

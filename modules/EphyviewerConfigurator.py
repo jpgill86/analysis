@@ -215,17 +215,17 @@ class EphyviewerConfigurator(ipywidgets.HBox):
     def _on_launch_clicked(self, button):
         self.launch_ephyviewer()
 
-    def launch_ephyviewer(self):
+    def launch_ephyviewer(self, support_increased_line_width=False):
         '''
 
         '''
 
         app = ephyviewer.mkQApp()
-        win = self.create_ephyviewer_window()
+        win = self.create_ephyviewer_window(support_increased_line_width)
         win.show()
         app.exec_()
 
-    def create_ephyviewer_window(self):
+    def create_ephyviewer_window(self, support_increased_line_width=False):
         '''
 
         '''
@@ -308,7 +308,15 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                     scatter_channels = spike_channels,
                 ))
 
-            trace_view = ephyviewer.TraceViewer(source = sources['signal'][0], name = 'signals')
+            # useOpenGL=True eliminates the extremely poor performance associated
+            # with TraceViewer's line_width > 1.0, but it also degrades overall
+            # performance somewhat and is reportedly unstable
+            if support_increased_line_width:
+                useOpenGL = True
+            else:
+                useOpenGL = None
+
+            trace_view = ephyviewer.TraceViewer(source = sources['signal'][0], name = 'signals', useOpenGL = useOpenGL)
             trace_view.params['scatter_size'] = 5
 
             win.add_view(trace_view)
