@@ -257,6 +257,43 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root
 
     return md
 
+def _selector_labels(all_metadata):
+
+    # indicate presence of local data files with symbols
+    has_local_data = {}
+    for key, metadata in all_metadata.items():
+        filenames = [k for k in metadata if k.endswith('_file') and metadata[k] is not None]
+        files_exist = [os.path.exists(abs_path(metadata, file)) for file in filenames]
+        if all(files_exist):
+            has_local_data[key] = '◆'
+        elif any(files_exist):
+            has_local_data[key] = '⬖'
+        else:
+            has_local_data[key] = '◇'
+
+    # indicate lack of video_offset with an exclamation point unless there is
+    # no video_file
+    has_video_offset = {}
+    for key, metadata in all_metadata.items():
+        if metadata['video_offset'] is None and metadata['video_file'] is not None:
+            has_video_offset[key] = '!'
+        else:
+            has_video_offset[key] = ' '
+
+    # create display text for the selector from keys and descriptions
+    longest_key_length = max([len(k) for k in all_metadata.keys()])
+    labels = [
+        has_local_data[k] +
+        has_video_offset[k] +
+        ' ' +
+        k.ljust(longest_key_length + 4) +
+        str(all_metadata[k]['description']
+            if all_metadata[k]['description'] else '')
+
+        for k in all_metadata.keys()]
+
+    return labels
+
 class MetadataSelector(ipywidgets.VBox):
     '''
     Interactive list box for Jupyter notebooks that allows the user to select
@@ -291,37 +328,8 @@ class MetadataSelector(ipywidgets.VBox):
         # read the metadata file
         self.all_metadata = LoadMetadata(file, local_data_root, remote_data_root)
 
-        # indicate presence of local data files with symbols
-        has_local_data = {}
-        for key, metadata in self.all_metadata.items():
-            filenames = [k for k in metadata if k.endswith('_file') and metadata[k] is not None]
-            files_exist = [os.path.exists(abs_path(metadata, file)) for file in filenames]
-            if all(files_exist):
-                has_local_data[key] = '◆'
-            elif any(files_exist):
-                has_local_data[key] = '⬖'
-            else:
-                has_local_data[key] = '◇'
-
-        # indicate lack of video_offset with an exclamation point unless there
-        # is no video_file
-        has_video_offset = {}
-        for key, metadata in self.all_metadata.items():
-            if metadata['video_offset'] is None and metadata['video_file'] is not None:
-                has_video_offset[key] = '!'
-            else:
-                has_video_offset[key] = ' '
-
         # create display text for the selector from keys and descriptions
-        longest_key_length = max([len(k) for k in self.all_metadata.keys()])
-        self.selector.options = [(
-            has_local_data[k] +
-            has_video_offset[k] +
-            ' ' +
-            k.ljust(longest_key_length + 4) +
-            str(self.all_metadata[k]['description']
-                if self.all_metadata[k]['description'] else ''),
-            k) for k in self.all_metadata.keys()]
+        self.selector.options = zip(_selector_labels(self.all_metadata), self.all_metadata.keys())
 
         # validate and set initial selection
         if initial_selection is None:

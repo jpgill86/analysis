@@ -220,6 +220,16 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
         '''
 
+        app = ephyviewer.mkQApp()
+        win = self.create_ephyviewer_window()
+        win.show()
+        app.exec_()
+
+    def create_ephyviewer_window(self):
+        '''
+
+        '''
+
         ########################################################################
         # DATA SOURCES
 
@@ -237,10 +247,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         sources['event'][0].all = [ev for ev in sources['event'][0].all if len(ev['time']) > 0 and '(from epoch encoder file)' not in ev['label']]
 
         ########################################################################
-        # APP AND WINDOW
-
-        # create a new app
-        app = ephyviewer.mkQApp()
+        # WINDOW
 
         # create a window that will be populated with viewers
         win = ephyviewer.MainViewer(
@@ -493,16 +500,14 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 win.add_view(data_frame_view, location = 'bottom', orientation = 'horizontal')
 
         ########################################################################
-        # LAUNCH
+        # FINAL TOUCHES
 
         # select first tabs
         for widget in win.children():
             if isinstance(widget, ephyviewer.PyQt5.QtWidgets.QTabBar):
                 widget.setCurrentIndex(0)
 
-        # show main window
+        # set amount of time shown initially
         win.set_xsize(40) # seconds
-        win.show()
 
-        # run Qapp
-        app.exec_()
+        return win
