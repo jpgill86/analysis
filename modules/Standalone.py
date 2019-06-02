@@ -73,14 +73,14 @@ class DataExplorer(QT.QMainWindow):
                     all_labels = _selector_labels(self.all_metadata)
                     for i, key in enumerate(self.all_metadata):
                         item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
-                        item.setData(QT.ToolTipRole, key) # use of ToolTipRole is hacky
+                        item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
             except AssertionError as e:
                 print('Bad metadata file!', e)
 
     def launch(self):
 
         try:
-            key = self.data_set_selector.currentItem().data(QT.ToolTipRole)
+            key = self.data_set_selector.currentItem().data(QT.StatusTipRole)
         except AttributeError:
             # nothing selected yet
             return
