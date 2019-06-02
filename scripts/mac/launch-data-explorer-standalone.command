@@ -9,4 +9,4 @@ source $CONDAROOT/etc/profile.d/conda.sh
 conda activate "$CONDAENV"
 
 cd ..
-python "launch-data-explorer.py"
+python "launch-data-explorer-standalone.py"
