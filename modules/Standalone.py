@@ -4,6 +4,8 @@
 
 '''
 
+import quantities as pq
+import elephant
 from ephyviewer import QT
 
 from ParseMetadata import LoadMetadata, _selector_labels
@@ -12,12 +14,15 @@ from EphyviewerConfigurator import EphyviewerConfigurator
 
 class DataExplorer(QT.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, lazy=True):
 
         QT.QMainWindow.__init__(self)
 
         self.setWindowTitle('Data Explorer')
         self.resize(600, 300)
+
+        # lazy loading using Neo RawIO
+        self.lazy = lazy
 
         # windows are appended to this list so that they persist after the
         # function that spawned them returns
@@ -73,18 +78,16 @@ class DataExplorer(QT.QMainWindow):
 
         metadata = self.all_metadata[key]
 
-        lazy = True
-
-        blk = LoadAndPrepareData(metadata, lazy=lazy)
+        blk = LoadAndPrepareData(metadata, lazy=self.lazy)
 
         rauc_sigs = []
-        if not lazy:
+        if not self.lazy:
             for sig in blk.segments[0].analogsignals:
                 rauc = elephant.signal_processing.rauc(sig, bin_duration = 0.1*pq.s)
                 rauc.name = sig.name + ' RAUC'
                 rauc_sigs.append(rauc)
 
-        ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, lazy)
+        ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
         # ephyviewer_config.enable_all()
 
         win = ephyviewer_config.create_ephyviewer_window()
