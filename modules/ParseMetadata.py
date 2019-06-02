@@ -220,9 +220,9 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root
     # iterate over all data sets
     for key in md:
 
+        assert type(md[key]) is dict, 'File "{}" may be formatted incorrectly, especially beginning with entry "{}"'.format(file, key)
+
         # fill in missing metadata with default values
-        if md[key] is None:
-            md[key] = {}
         defaults = _defaults_for_key(key)
         for k in defaults:
             md[key].setdefault(k, defaults[k])

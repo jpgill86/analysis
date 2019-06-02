@@ -66,13 +66,16 @@ class DataExplorer(QT.QMainWindow):
             filter='YAML files (*.yml *.yaml)')
 
         if filename:
-            self.all_metadata = LoadMetadata(filename)
-            if self.all_metadata:
-                self.data_set_selector.clear()
-                all_labels = _selector_labels(self.all_metadata)
-                for i, key in enumerate(self.all_metadata):
-                    item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
-                    item.setData(QT.ToolTipRole, key) # use of ToolTipRole is hacky
+            try:
+                self.all_metadata = LoadMetadata(filename)
+                if self.all_metadata:
+                    self.data_set_selector.clear()
+                    all_labels = _selector_labels(self.all_metadata)
+                    for i, key in enumerate(self.all_metadata):
+                        item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
+                        item.setData(QT.ToolTipRole, key) # use of ToolTipRole is hacky
+            except AssertionError as e:
+                print('Bad metadata file!', e)
 
     def launch(self):
 
