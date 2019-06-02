@@ -371,7 +371,7 @@ class MetadataSelector(ipywidgets.VBox):
         '''
 
         # warn if video_offset is not set
-        if self.selected_metadata['video_offset'] is None:
+        if self.selected_metadata['video_file'] is not None and self.selected_metadata['video_offset'] is None:
             print('Warning: Video sync may be incorrect! video_offset not set for {}'.format(self.selector.value))
 
     def _on_download_clicked(self, button):

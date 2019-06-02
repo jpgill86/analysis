@@ -162,11 +162,11 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         self.children = [controls_vbox, self.launch_button]
 
         # warn about potential video sync problems
-        if metadata['video_file'] and not metadata['video_offset']:
+        if metadata['video_file'] is not None and metadata['video_offset'] is None:
             print('WARNING: Your video will likely be out of sync with your')
             print('data because video_offset is unspecified! Consider adding')
             print('it to your metadata.')
-        if metadata['video_file'] and not metadata['video_jumps']:
+        if metadata['video_file'] is not None and metadata['video_jumps'] is None:
             approx_video_jumps = EstimateVideoJumpTimes(blk)
             if approx_video_jumps:
                 print('WARNING: It seems that AxoGraph was paused at least once')
