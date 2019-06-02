@@ -8,4 +8,5 @@ from Standalone import DataExplorer
 app = mkQApp()
 win = DataExplorer(lazy=True, support_increased_line_width=False)
 win.show()
+print('Ready')
 app.exec_()

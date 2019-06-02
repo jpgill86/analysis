@@ -1,5 +1,7 @@
 @ECHO OFF
 
+ECHO Starting
+
 SET CONDAENV=analysis
 
 IF EXIST %USERPROFILE%\Anaconda3 (

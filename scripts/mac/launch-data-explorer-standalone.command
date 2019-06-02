@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Starting"
+
 CONDAENV=analysis
 
 CONDAROOT=$(dirname $(which conda))/..
