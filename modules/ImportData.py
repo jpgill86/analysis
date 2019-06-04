@@ -64,23 +64,29 @@ def ReadDataFile(metadata, lazy=False):
     io = neo.io.get_io(abs_path(metadata, 'data_file'))
     blk = io.read_block(lazy=lazy)
 
-    # load all proxy objects except analog signals,
-    # and convert byte labels to Unicode strings
+    # load all proxy objects except analog signals
     if lazy:
         for i in range(len(blk.segments[0].epochs)):
             epoch = blk.segments[0].epochs[i]
             if hasattr(epoch, 'load'):
                 blk.segments[0].epochs[i] = epoch.load()
-                blk.segments[0].epochs[i].labels = blk.segments[0].epochs[i].labels.astype('U')
+
         for i in range(len(blk.segments[0].events)):
             event = blk.segments[0].events[i]
             if hasattr(event, 'load'):
                 blk.segments[0].events[i] = event.load()
-                blk.segments[0].events[i].labels = blk.segments[0].events[i].labels.astype('U')
+
         for i in range(len(blk.segments[0].spiketrains)):
             spiketrain = blk.segments[0].spiketrains[i]
             if hasattr(spiketrain, 'load'):
                 blk.segments[0].spiketrains[i] = spiketrain.load()
+
+    # convert byte labels to Unicode strings
+    for epoch in blk.segments[0].epochs:
+        epoch.labels = epoch.labels.astype('U')
+
+    for event in blk.segments[0].events:
+        event.labels = event.labels.astype('U')
 
     return blk
 
