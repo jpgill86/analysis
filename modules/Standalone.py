@@ -24,11 +24,11 @@ class DataExplorer(QT.QMainWindow):
         # lazy loading using Neo RawIO
         self.lazy = lazy
 
-        # - projector_mode=False uses "dark mode" colors (light lines on a dark
-        #   background), which look good on screens
-        # - projector_mode=True uses "light mode" colors (dark lines on a light
-        #   background), which show up better on projectors, and antialiasing
-        #   is turned on
+        # - projector_mode=False uses "dark mode" colors (light traces on a
+        #   dark background), which look good on screens
+        # - projector_mode=True uses "light mode" colors (dark traces on a
+        #   light background), which show up better on projectors, and
+        #   antialiasing is turned on
         self.projector_mode = projector_mode
 
         # support_increased_line_width=True eliminates the extremely poor
@@ -66,19 +66,19 @@ class DataExplorer(QT.QMainWindow):
 
         self.options_menu = self.menuBar().addMenu(self.tr('&Options'))
 
-        do_toggle_lazy = QT.QAction('&Lazy loading', self, shortcut = 'Ctrl+L')
+        do_toggle_lazy = QT.QAction('&Fast loading (disables filters, spike detection, RAUC)', self, shortcut = 'Ctrl+F')
         do_toggle_lazy.setCheckable(True)
         do_toggle_lazy.setChecked(self.lazy)
         do_toggle_lazy.triggered.connect(self.toggle_lazy)
         self.options_menu.addAction(do_toggle_lazy)
 
-        do_toggle_projector_mode = QT.QAction('&Projector mode', self, shortcut = 'Ctrl+P')
+        do_toggle_projector_mode = QT.QAction('&Projector mode (dark traces on light background)', self, shortcut = 'Ctrl+P')
         do_toggle_projector_mode.setCheckable(True)
         do_toggle_projector_mode.setChecked(self.projector_mode)
         do_toggle_projector_mode.triggered.connect(self.toggle_projector_mode)
         self.options_menu.addAction(do_toggle_projector_mode)
 
-        do_toggle_support_increased_line_width = QT.QAction('&Thick traces', self, shortcut = 'Ctrl+T')
+        do_toggle_support_increased_line_width = QT.QAction('&Thick traces (worse performance)', self, shortcut = 'Ctrl+T')
         do_toggle_support_increased_line_width.setCheckable(True)
         do_toggle_support_increased_line_width.setChecked(self.support_increased_line_width)
         do_toggle_support_increased_line_width.triggered.connect(self.toggle_support_increased_line_width)
