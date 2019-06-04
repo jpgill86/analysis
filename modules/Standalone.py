@@ -78,7 +78,7 @@ class DataExplorer(QT.QMainWindow):
         do_toggle_projector_mode.triggered.connect(self.toggle_projector_mode)
         self.options_menu.addAction(do_toggle_projector_mode)
 
-        do_toggle_support_increased_line_width = QT.QAction('Support increased line &width', self, shortcut = 'Ctrl+W')
+        do_toggle_support_increased_line_width = QT.QAction('&Thick traces', self, shortcut = 'Ctrl+T')
         do_toggle_support_increased_line_width.setCheckable(True)
         do_toggle_support_increased_line_width.setChecked(self.support_increased_line_width)
         do_toggle_support_increased_line_width.triggered.connect(self.toggle_support_increased_line_width)

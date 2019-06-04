@@ -332,14 +332,17 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             # performance somewhat and is reportedly unstable
             if support_increased_line_width:
                 useOpenGL = True
+                line_width = 2.0
             else:
                 useOpenGL = None
+                line_width = 1.0
 
             trace_view = ephyviewer.TraceViewer(source = sources['signal'][0], name = 'signals', useOpenGL = useOpenGL)
 
             win.add_view(trace_view)
 
             trace_view.params['scatter_size'] = 5
+            trace_view.params['line_width'] = line_width
             trace_view.params['display_labels'] = True
             trace_view.params['antialias'] = antialias
 
@@ -383,6 +386,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             else:
                 win.add_view(trace_rauc_view)
 
+            trace_rauc_view.params['line_width'] = line_width
             trace_rauc_view.params['display_labels'] = True
             trace_rauc_view.params['display_offset'] = True
             trace_rauc_view.params['antialias'] = antialias
