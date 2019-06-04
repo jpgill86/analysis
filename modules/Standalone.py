@@ -14,7 +14,7 @@ from EphyviewerConfigurator import EphyviewerConfigurator
 
 class DataExplorer(QT.QMainWindow):
 
-    def __init__(self, lazy=True, support_increased_line_width=False):
+    def __init__(self, lazy=True, projector_mode=False, support_increased_line_width=False):
 
         QT.QMainWindow.__init__(self)
 
@@ -23,6 +23,13 @@ class DataExplorer(QT.QMainWindow):
 
         # lazy loading using Neo RawIO
         self.lazy = lazy
+
+        # - projector_mode=False uses "dark mode" colors (light lines on a dark
+        #   background), which look good on screens
+        # - projector_mode=True uses "light mode" colors (dark lines on a light
+        #   background), which show up better on projectors, and antialiasing
+        #   is turned on
+        self.projector_mode = projector_mode
 
         # support_increased_line_width=True eliminates the extremely poor
         # performance associated with TraceViewer's line_width > 1.0, but it
@@ -47,15 +54,35 @@ class DataExplorer(QT.QMainWindow):
 
     def createMenus(self):
 
-        self.file_menu = self.menuBar().addMenu(self.tr('File'))
+        self.file_menu = self.menuBar().addMenu(self.tr('&File'))
 
         do_open_metadata = QT.QAction('&Open metadata', self, shortcut = 'Ctrl+O')
         do_open_metadata.triggered.connect(self.open_metadata)
         self.file_menu.addAction(do_open_metadata)
 
-        do_launch = QT.QAction('&Launch', self, shortcut = 'Ctrl+L')
+        do_launch = QT.QAction('&Launch', self, shortcut = 'Return')
         do_launch.triggered.connect(self.launch)
         self.file_menu.addAction(do_launch)
+
+        self.options_menu = self.menuBar().addMenu(self.tr('&Options'))
+
+        do_toggle_lazy = QT.QAction('&Lazy loading', self, shortcut = 'Ctrl+L')
+        do_toggle_lazy.setCheckable(True)
+        do_toggle_lazy.setChecked(self.lazy)
+        do_toggle_lazy.triggered.connect(self.toggle_lazy)
+        self.options_menu.addAction(do_toggle_lazy)
+
+        do_toggle_projector_mode = QT.QAction('&Projector mode', self, shortcut = 'Ctrl+P')
+        do_toggle_projector_mode.setCheckable(True)
+        do_toggle_projector_mode.setChecked(self.projector_mode)
+        do_toggle_projector_mode.triggered.connect(self.toggle_projector_mode)
+        self.options_menu.addAction(do_toggle_projector_mode)
+
+        do_toggle_support_increased_line_width = QT.QAction('Support increased line &width', self, shortcut = 'Ctrl+W')
+        do_toggle_support_increased_line_width.setCheckable(True)
+        do_toggle_support_increased_line_width.setChecked(self.support_increased_line_width)
+        do_toggle_support_increased_line_width.triggered.connect(self.toggle_support_increased_line_width)
+        self.options_menu.addAction(do_toggle_support_increased_line_width)
 
     def open_metadata(self):
 
@@ -97,8 +124,17 @@ class DataExplorer(QT.QMainWindow):
                 rauc_sigs.append(rauc)
 
         ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
-        # ephyviewer_config.enable_all()
+        ephyviewer_config.enable_all()
 
-        win = ephyviewer_config.create_ephyviewer_window(self.support_increased_line_width)
+        win = ephyviewer_config.create_ephyviewer_window(projector_mode=self.projector_mode, support_increased_line_width=self.support_increased_line_width)
         self.windows.append(win)
         win.show()
+
+    def toggle_lazy(self, checked):
+        self.lazy = checked
+
+    def toggle_projector_mode(self, checked):
+        self.projector_mode = checked
+
+    def toggle_support_increased_line_width(self, checked):
+        self.support_increased_line_width = checked

@@ -215,17 +215,17 @@ class EphyviewerConfigurator(ipywidgets.HBox):
     def _on_launch_clicked(self, button):
         self.launch_ephyviewer()
 
-    def launch_ephyviewer(self, support_increased_line_width=False):
+    def launch_ephyviewer(self, projector_mode=False, support_increased_line_width=False):
         '''
 
         '''
 
         app = ephyviewer.mkQApp()
-        win = self.create_ephyviewer_window(support_increased_line_width)
+        win = self.create_ephyviewer_window(projector_mode=projector_mode, support_increased_line_width=support_increased_line_width)
         win.show()
         app.exec_()
 
-    def create_ephyviewer_window(self, support_increased_line_width=False):
+    def create_ephyviewer_window(self, projector_mode=False, support_increased_line_width=False):
         '''
 
         '''
@@ -257,6 +257,25 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             play_interval = 0.1, # refresh period in seconds
         )
         win.setWindowTitle(self.metadata['key'])
+
+        ########################################################################
+        # PROJECTOR MODE
+
+        if projector_mode:
+            # "light theme"
+            cmap = 'Dark2'
+            background_color = '#F0F0F0' # light gray
+            vline_color = '#000000AA' # transparent black
+            label_fill_color = '#DDDDDDDD' # transparent light gray
+            antialias = True
+
+        else:
+            # "dark theme"
+            cmap = 'Accent'
+            background_color = 'k' # black
+            vline_color = '#FFFFFFAA' # transparent white
+            label_fill_color = '#222222DD' # transparent dark gray
+            antialias = False
 
         ########################################################################
         # PREPARE TRACE PARAMETERS
@@ -317,14 +336,18 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 useOpenGL = None
 
             trace_view = ephyviewer.TraceViewer(source = sources['signal'][0], name = 'signals', useOpenGL = useOpenGL)
-            trace_view.params['scatter_size'] = 5
 
             win.add_view(trace_view)
 
+            trace_view.params['scatter_size'] = 5
             trace_view.params['display_labels'] = True
+            trace_view.params['antialias'] = antialias
 
             # select a color scheme
-            trace_view.params_controller.combo_cmap.setCurrentText('Accent')
+            trace_view.params['background_color'] = background_color
+            trace_view.params['vline_color'] = vline_color
+            trace_view.params['label_fill_color'] = label_fill_color
+            trace_view.params_controller.combo_cmap.setCurrentText(cmap)
             trace_view.params_controller.on_automatic_color()
 
             # adjust plot range, scaling, and positioning
@@ -362,9 +385,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
             trace_rauc_view.params['display_labels'] = True
             trace_rauc_view.params['display_offset'] = True
+            trace_rauc_view.params['antialias'] = antialias
 
             # select a color scheme
-            trace_rauc_view.params_controller.combo_cmap.setCurrentText('Accent')
+            trace_rauc_view.params['background_color'] = background_color
+            trace_rauc_view.params['vline_color'] = vline_color
+            trace_rauc_view.params['label_fill_color'] = label_fill_color
+            trace_rauc_view.params_controller.combo_cmap.setCurrentText(cmap)
             trace_rauc_view.params_controller.on_automatic_color()
 
             # adjust plot range
@@ -418,7 +445,10 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             win.add_view(spike_train_view)
 
             # select a color scheme
-            spike_train_view.params_controller.combo_cmap.setCurrentText('Accent')
+            spike_train_view.params['background_color'] = background_color
+            spike_train_view.params['vline_color'] = vline_color
+            spike_train_view.params['label_fill_color'] = label_fill_color
+            spike_train_view.params_controller.combo_cmap.setCurrentText(cmap)
             spike_train_view.params_controller.on_automatic_color()
 
         ########################################################################
@@ -430,7 +460,10 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             win.add_view(epoch_view)
 
             # select a color scheme
-            epoch_view.params_controller.combo_cmap.setCurrentText('Accent')
+            epoch_view.params['background_color'] = background_color
+            epoch_view.params['vline_color'] = vline_color
+            epoch_view.params['label_fill_color'] = label_fill_color
+            epoch_view.params_controller.combo_cmap.setCurrentText(cmap)
             epoch_view.params_controller.on_automatic_color()
 
         ########################################################################
@@ -446,6 +479,12 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             epoch_encoder = ephyviewer.EpochEncoder(source = writable_epoch_source, name = 'epoch encoder')
             epoch_encoder.params['exclusive_mode'] = False
             win.add_view(epoch_encoder)
+
+            # select a color scheme
+            epoch_encoder.params['background_color'] = background_color
+            epoch_encoder.params['vline_color'] = vline_color
+            epoch_encoder.params['label_fill_color'] = label_fill_color
+            # TODO add support for combo_cmap
 
         ########################################################################
         # VIDEO
