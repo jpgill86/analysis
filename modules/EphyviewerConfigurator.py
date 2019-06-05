@@ -525,6 +525,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 video_source._t_stop  = max(video_source.t_stops)
 
             video_view = ephyviewer.VideoViewer(source = video_source, name = 'video')
+            video_view.graphiclayout.setBackground(background_color)
             win.add_view(video_view, location = 'bottom', orientation = 'horizontal')
 
         ########################################################################
