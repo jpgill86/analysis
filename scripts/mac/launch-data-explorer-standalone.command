@@ -10,5 +10,5 @@ source $CONDAROOT/etc/profile.d/conda.sh
 
 conda activate "$CONDAENV"
 
-cd ..
+cd "$(dirname "$0")/.."
 python "launch-data-explorer-standalone.py"
