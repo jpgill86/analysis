@@ -16,7 +16,7 @@ from EphyviewerConfigurator import EphyviewerConfigurator
 
 class DataExplorer(QT.QMainWindow):
 
-    def __init__(self, lazy=True, projector_mode=False, support_increased_line_width=False):
+    def __init__(self, lazy=True, theme='light', support_increased_line_width=False):
 
         QT.QMainWindow.__init__(self)
 
@@ -28,12 +28,8 @@ class DataExplorer(QT.QMainWindow):
         # lazy loading using Neo RawIO
         self.lazy = lazy
 
-        # - projector_mode=False uses "dark mode" colors (light traces on a
-        #   dark background), which look good on screens
-        # - projector_mode=True uses "light mode" colors (dark traces on a
-        #   light background), which show up better on projectors, and
-        #   antialiasing is turned on
-        self.projector_mode = projector_mode
+        # available themes are 'light' and 'dark'
+        self.theme = theme
 
         # support_increased_line_width=True eliminates the extremely poor
         # performance associated with TraceViewer's line_width > 1.0, but it
@@ -70,23 +66,37 @@ class DataExplorer(QT.QMainWindow):
 
         self.options_menu = self.menuBar().addMenu(self.tr('&Options'))
 
-        do_toggle_lazy = QT.QAction('&Fast loading (disables filters, spike detection, RAUC)', self, shortcut = 'Ctrl+F')
+        do_toggle_lazy = QT.QAction('&Fast loading (disables filters, spike detection, RAUC)', self)
         do_toggle_lazy.setCheckable(True)
         do_toggle_lazy.setChecked(self.lazy)
         do_toggle_lazy.triggered.connect(self.toggle_lazy)
         self.options_menu.addAction(do_toggle_lazy)
 
-        do_toggle_projector_mode = QT.QAction('&Projector mode (dark traces on light background)', self, shortcut = 'Ctrl+P')
-        do_toggle_projector_mode.setCheckable(True)
-        do_toggle_projector_mode.setChecked(self.projector_mode)
-        do_toggle_projector_mode.triggered.connect(self.toggle_projector_mode)
-        self.options_menu.addAction(do_toggle_projector_mode)
-
-        do_toggle_support_increased_line_width = QT.QAction('&Thick traces (worse performance)', self, shortcut = 'Ctrl+T')
+        do_toggle_support_increased_line_width = QT.QAction('&Thick traces (worse performance)', self)
         do_toggle_support_increased_line_width.setCheckable(True)
         do_toggle_support_increased_line_width.setChecked(self.support_increased_line_width)
         do_toggle_support_increased_line_width.triggered.connect(self.toggle_support_increased_line_width)
         self.options_menu.addAction(do_toggle_support_increased_line_width)
+
+        self.theme_menu = self.menuBar().addMenu(self.tr('&Theme'))
+        self.theme_group = QT.QActionGroup(self.theme_menu)
+
+        do_select_light_theme = self.theme_menu.addAction('&Light theme')
+        do_select_light_theme.setCheckable(True)
+        do_select_light_theme.triggered.connect(self.select_light_theme)
+        self.theme_group.addAction(do_select_light_theme)
+
+        do_select_dark_theme = self.theme_menu.addAction('&Dark theme')
+        do_select_dark_theme.setCheckable(True)
+        do_select_dark_theme.triggered.connect(self.select_dark_theme)
+        self.theme_group.addAction(do_select_dark_theme)
+
+        if self.theme == 'light':
+            do_select_light_theme.setChecked(True)
+        elif self.theme == 'dark':
+            do_select_dark_theme.setChecked(True)
+        else:
+            raise ValueError('theme "{}" is unrecognized'.format(self.theme))
 
     def open_metadata(self):
 
@@ -130,15 +140,18 @@ class DataExplorer(QT.QMainWindow):
         ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
         ephyviewer_config.enable_all()
 
-        win = ephyviewer_config.create_ephyviewer_window(projector_mode=self.projector_mode, support_increased_line_width=self.support_increased_line_width)
+        win = ephyviewer_config.create_ephyviewer_window(theme=self.theme, support_increased_line_width=self.support_increased_line_width)
         self.windows.append(win)
         win.show()
 
     def toggle_lazy(self, checked):
         self.lazy = checked
 
-    def toggle_projector_mode(self, checked):
-        self.projector_mode = checked
-
     def toggle_support_increased_line_width(self, checked):
         self.support_increased_line_width = checked
+
+    def select_light_theme(self):
+        self.theme = 'light'
+
+    def select_dark_theme(self):
+        self.theme = 'dark'
