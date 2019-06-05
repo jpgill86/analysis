@@ -4,6 +4,8 @@
 
 '''
 
+import os
+
 import quantities as pq
 import elephant
 from ephyviewer import QT
@@ -17,6 +19,8 @@ class DataExplorer(QT.QMainWindow):
     def __init__(self, lazy=True, projector_mode=False, support_increased_line_width=False):
 
         QT.QMainWindow.__init__(self)
+
+        self.setWindowIcon(QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'icons', 'soundwave.png')))
 
         self.setWindowTitle('Data Explorer')
         self.resize(600, 300)
