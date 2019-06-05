@@ -50,9 +50,14 @@ class DataExplorer(QT.QMainWindow):
         self.data_set_selector.setStyleSheet('font: 9pt Courier;')
         self.setCentralWidget(self.data_set_selector)
 
-        self.createMenus()
+        # construct the menus
+        self.create_menus()
 
-    def createMenus(self):
+        # open example metadata file
+        example_metadata = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
+        self.populate_metadata_selector(example_metadata)
+
+    def create_menus(self):
 
         self.file_menu = self.menuBar().addMenu(self.tr('&File'))
 
@@ -114,16 +119,20 @@ class DataExplorer(QT.QMainWindow):
             filter='YAML files (*.yml *.yaml)')
 
         if filename:
-            try:
-                self.all_metadata = LoadMetadata(filename)
-                if self.all_metadata:
-                    self.data_set_selector.clear()
-                    all_labels = _selector_labels(self.all_metadata)
-                    for i, key in enumerate(self.all_metadata):
-                        item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
-                        item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
-            except AssertionError as e:
-                print('Bad metadata file!', e)
+            self.populate_metadata_selector(filename)
+
+    def populate_metadata_selector(self, filename):
+
+        try:
+            self.all_metadata = LoadMetadata(filename)
+            if self.all_metadata:
+                self.data_set_selector.clear()
+                all_labels = _selector_labels(self.all_metadata)
+                for i, key in enumerate(self.all_metadata):
+                    item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
+                    item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
+        except AssertionError as e:
+            print('Bad metadata file!', e)
 
     def launch(self):
 
