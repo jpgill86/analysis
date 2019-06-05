@@ -108,6 +108,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
     ])
 
     themes = {}
+    themes['original'] = None # special keyword to use ephyviewer's defaults
     themes['light'] = {
         'cmap': 'Dark2', # dark traces
         'background_color': '#F0F0F0', # light gray
@@ -343,12 +344,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             trace_view.params['display_labels'] = True
             trace_view.params['antialias'] = True
 
-            # select a color scheme
-            trace_view.params['background_color'] = self.themes[theme]['background_color']
-            trace_view.params['vline_color'] = self.themes[theme]['vline_color']
-            trace_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
-            trace_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
-            trace_view.params_controller.on_automatic_color()
+            # set the theme
+            if theme != 'original':
+                trace_view.params['background_color'] = self.themes[theme]['background_color']
+                trace_view.params['vline_color'] = self.themes[theme]['vline_color']
+                trace_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
+                trace_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
+                trace_view.params_controller.on_automatic_color()
 
             # adjust plot range, scaling, and positioning
             trace_view.params['ylim_max'] = 0.5
@@ -388,12 +390,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             trace_rauc_view.params['display_offset'] = True
             trace_rauc_view.params['antialias'] = True
 
-            # select a color scheme
-            trace_rauc_view.params['background_color'] = self.themes[theme]['background_color']
-            trace_rauc_view.params['vline_color'] = self.themes[theme]['vline_color']
-            trace_rauc_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
-            trace_rauc_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
-            trace_rauc_view.params_controller.on_automatic_color()
+            # set the theme
+            if theme != 'original':
+                trace_rauc_view.params['background_color'] = self.themes[theme]['background_color']
+                trace_rauc_view.params['vline_color'] = self.themes[theme]['vline_color']
+                trace_rauc_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
+                trace_rauc_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
+                trace_rauc_view.params_controller.on_automatic_color()
 
             # adjust plot range
             trace_rauc_view.params['ylim_max'] = 0.5
@@ -445,12 +448,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             spike_train_view = ephyviewer.SpikeTrainViewer(source = sources['spike'][0], name = 'spiketrains')
             win.add_view(spike_train_view)
 
-            # select a color scheme
-            spike_train_view.params['background_color'] = self.themes[theme]['background_color']
-            spike_train_view.params['vline_color'] = self.themes[theme]['vline_color']
-            spike_train_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
-            spike_train_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
-            spike_train_view.params_controller.on_automatic_color()
+            # set the theme
+            if theme != 'original':
+                spike_train_view.params['background_color'] = self.themes[theme]['background_color']
+                spike_train_view.params['vline_color'] = self.themes[theme]['vline_color']
+                spike_train_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
+                spike_train_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
+                spike_train_view.params_controller.on_automatic_color()
 
         ########################################################################
         # EPOCHS
@@ -460,12 +464,13 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             epoch_view = ephyviewer.EpochViewer(source = sources['epoch'][0], name = 'epochs')
             win.add_view(epoch_view)
 
-            # select a color scheme
-            epoch_view.params['background_color'] = self.themes[theme]['background_color']
-            epoch_view.params['vline_color'] = self.themes[theme]['vline_color']
-            epoch_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
-            epoch_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
-            epoch_view.params_controller.on_automatic_color()
+            # set the theme
+            if theme != 'original':
+                epoch_view.params['background_color'] = self.themes[theme]['background_color']
+                epoch_view.params['vline_color'] = self.themes[theme]['vline_color']
+                epoch_view.params['label_fill_color'] = self.themes[theme]['label_fill_color']
+                epoch_view.params_controller.combo_cmap.setCurrentText(self.themes[theme]['cmap'])
+                epoch_view.params_controller.on_automatic_color()
 
         ########################################################################
         # EPOCH ENCODER
@@ -481,11 +486,12 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             epoch_encoder.params['exclusive_mode'] = False
             win.add_view(epoch_encoder)
 
-            # select a color scheme
-            epoch_encoder.params['background_color'] = self.themes[theme]['background_color']
-            epoch_encoder.params['vline_color'] = self.themes[theme]['vline_color']
-            epoch_encoder.params['label_fill_color'] = self.themes[theme]['label_fill_color']
-            # TODO add support for combo_cmap
+            # set the theme
+            if theme != 'original':
+                epoch_encoder.params['background_color'] = self.themes[theme]['background_color']
+                epoch_encoder.params['vline_color'] = self.themes[theme]['vline_color']
+                epoch_encoder.params['label_fill_color'] = self.themes[theme]['label_fill_color']
+                # TODO add support for combo_cmap
 
         ########################################################################
         # VIDEO
@@ -520,7 +526,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 video_source._t_stop  = max(video_source.t_stops)
 
             video_view = ephyviewer.VideoViewer(source = video_source, name = 'video')
-            video_view.graphiclayout.setBackground(self.themes[theme]['background_color'])
+            if theme != 'original':
+                video_view.graphiclayout.setBackground(self.themes[theme]['background_color'])
             win.add_view(video_view, location = 'bottom', orientation = 'horizontal')
 
         ########################################################################

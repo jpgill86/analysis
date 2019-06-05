@@ -28,7 +28,7 @@ class DataExplorer(QT.QMainWindow):
         # lazy loading using Neo RawIO
         self.lazy = lazy
 
-        # available themes are 'light' and 'dark'
+        # available themes are 'light', 'dark', and 'original'
         self.theme = theme
 
         # support_increased_line_width=True eliminates the extremely poor
@@ -91,10 +91,17 @@ class DataExplorer(QT.QMainWindow):
         do_select_dark_theme.triggered.connect(self.select_dark_theme)
         self.theme_group.addAction(do_select_dark_theme)
 
+        do_select_original_theme = self.theme_menu.addAction('&Original theme')
+        do_select_original_theme.setCheckable(True)
+        do_select_original_theme.triggered.connect(self.select_original_theme)
+        self.theme_group.addAction(do_select_original_theme)
+
         if self.theme == 'light':
             do_select_light_theme.setChecked(True)
         elif self.theme == 'dark':
             do_select_dark_theme.setChecked(True)
+        elif self.theme == 'original':
+            do_select_original_theme.setChecked(True)
         else:
             raise ValueError('theme "{}" is unrecognized'.format(self.theme))
 
@@ -155,3 +162,6 @@ class DataExplorer(QT.QMainWindow):
 
     def select_dark_theme(self):
         self.theme = 'dark'
+
+    def select_original_theme(self):
+        self.theme = 'original'
