@@ -54,8 +54,8 @@ class DataExplorer(QT.QMainWindow):
         self.create_menus()
 
         # open example metadata file
-        example_metadata = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
-        self.populate_metadata_selector(example_metadata)
+        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
+        self.populate_metadata_selector()
 
     def create_menus(self):
 
@@ -64,6 +64,10 @@ class DataExplorer(QT.QMainWindow):
         do_open_metadata = QT.QAction('&Open metadata', self, shortcut = 'Ctrl+O')
         do_open_metadata.triggered.connect(self.open_metadata)
         self.file_menu.addAction(do_open_metadata)
+
+        do_reload_metadata = QT.QAction('&Reload metadata', self, shortcut = 'Ctrl+R')
+        do_reload_metadata.triggered.connect(self.populate_metadata_selector)
+        self.file_menu.addAction(do_reload_metadata)
 
         do_launch = QT.QAction('&Launch', self, shortcut = 'Return')
         do_launch.triggered.connect(self.launch)
@@ -112,27 +116,27 @@ class DataExplorer(QT.QMainWindow):
 
     def open_metadata(self):
 
-        filename, _ = QT.QFileDialog.getOpenFileName(
+        self.filename, _ = QT.QFileDialog.getOpenFileName(
             parent=self,
             caption='Open metadata',
             directory=None,
             filter='YAML files (*.yml *.yaml)')
 
-        if filename:
-            self.populate_metadata_selector(filename)
+        self.populate_metadata_selector()
 
-    def populate_metadata_selector(self, filename):
+    def populate_metadata_selector(self):
 
-        try:
-            self.all_metadata = LoadMetadata(filename)
-            if self.all_metadata:
-                self.data_set_selector.clear()
-                all_labels = _selector_labels(self.all_metadata)
-                for i, key in enumerate(self.all_metadata):
-                    item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
-                    item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
-        except AssertionError as e:
-            print('Bad metadata file!', e)
+        if self.filename:
+            try:
+                self.all_metadata = LoadMetadata(self.filename)
+                if self.all_metadata:
+                    self.data_set_selector.clear()
+                    all_labels = _selector_labels(self.all_metadata)
+                    for i, key in enumerate(self.all_metadata):
+                        item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
+                        item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
+            except AssertionError as e:
+                print('Bad metadata file!', e)
 
     def launch(self):
 
