@@ -19,3 +19,7 @@ CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
 cd ..
 python "launch-data-explorer-standalone.py"
+
+IF %ERRORLEVEL% NEQ 0 (
+   PAUSE
+)
