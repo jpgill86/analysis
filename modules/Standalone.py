@@ -148,21 +148,29 @@ class DataExplorer(QT.QMainWindow):
 
         metadata = self.all_metadata[key]
 
-        blk = LoadAndPrepareData(metadata, lazy=self.lazy)
+        try:
 
-        rauc_sigs = []
-        if not self.lazy:
-            for sig in blk.segments[0].analogsignals:
-                rauc = elephant.signal_processing.rauc(sig, bin_duration = 0.1*pq.s)
-                rauc.name = sig.name + ' RAUC'
-                rauc_sigs.append(rauc)
+            blk = LoadAndPrepareData(metadata, lazy=self.lazy)
 
-        ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
-        ephyviewer_config.enable_all()
+            rauc_sigs = []
+            if not self.lazy:
+                for sig in blk.segments[0].analogsignals:
+                    rauc = elephant.signal_processing.rauc(sig, bin_duration = 0.1*pq.s)
+                    rauc.name = sig.name + ' RAUC'
+                    rauc_sigs.append(rauc)
 
-        win = ephyviewer_config.create_ephyviewer_window(theme=self.theme, support_increased_line_width=self.support_increased_line_width)
-        self.windows.append(win)
-        win.show()
+            ephyviewer_config = EphyviewerConfigurator(metadata, blk, rauc_sigs, self.lazy)
+            ephyviewer_config.enable_all()
+
+            win = ephyviewer_config.create_ephyviewer_window(theme=self.theme, support_increased_line_width=self.support_increased_line_width)
+            self.windows.append(win)
+            win.show()
+
+        except FileNotFoundError as e:
+
+            print('Some files were not found locally and may need to be downloaded')
+            print(e)
+            return
 
     def toggle_lazy(self, checked):
         self.lazy = checked
