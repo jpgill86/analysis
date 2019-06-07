@@ -5,14 +5,14 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from urllib.request import HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
-from FTPVeryBasicAuthHandler import FTPVeryBasicAuthHandler
+from FTPBasicAuthHandler import FTPBasicAuthHandler
 
 
 # install HTTP and FTP authentication handlers, the latter of which also adds
 # reliable file size retrieval before downloading
 _max_bad_login_attempts = 3
 _http_auth_handler = HTTPBasicAuthHandler(HTTPPasswordMgrWithDefaultRealm())
-_ftp_auth_handler = FTPVeryBasicAuthHandler()
+_ftp_auth_handler = FTPBasicAuthHandler()
 _opener = urllib.request.build_opener(_http_auth_handler, _ftp_auth_handler)
 urllib.request.install_opener(_opener)
 

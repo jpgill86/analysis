@@ -4,7 +4,7 @@ from urllib.request import FTPHandler, HTTPPasswordMgr
 from urllib.parse import splitport, splituser, unquote
 
 
-class FTPVeryBasicAuthHandler(FTPHandler):
+class FTPBasicAuthHandler(FTPHandler):
     '''
     This subclass of urllib.request.FTPHandler implements basic authentication
     management for FTP connections. Like HTTPBasicAuthHandler, this handler for
@@ -18,7 +18,7 @@ class FTPVeryBasicAuthHandler(FTPHandler):
     This handler can be installed globally in a Python session so that calls
     to urllib.request.urlopen('ftp://...') will use it automatically:
 
-    >>> handler = FTPVeryBasicAuthHandler()
+    >>> handler = FTPBasicAuthHandler()
     >>> handler.add_password(None, uri, user, passwd)  # realm must be None
     >>> opener = urllib.request.build_opener(handler)
     >>> urllib.request.install_opener(opener)
@@ -148,13 +148,13 @@ class FTPVeryBasicAuthHandler(FTPHandler):
 
 def setup():
     '''
-    Install FTPVeryBasicAuthHandler as the global default FTP handler
+    Install FTPBasicAuthHandler as the global default FTP handler
 
     Note that install_opener will remove all other non-default handlers
     installed in a different opener, such as an HTTPBasicAuthHandler.
     '''
 
-    handler = FTPVeryBasicAuthHandler()
+    handler = FTPBasicAuthHandler()
     opener = urllib.request.build_opener(handler)
     urllib.request.install_opener(opener)
     return handler
