@@ -161,7 +161,7 @@ def EstimateVideoJumpTimes(blk):
         event_stop_times = np.array([], dtype=np.float)
         ev = blk.segments[0].events[0]
         for time, label in zip(ev.times, ev.labels):
-            if label == b'Stop':
+            if label == 'Stop':
                 event_stop_times = np.append(event_stop_times, time.magnitude)
 
         # pair stop times with pause durations
