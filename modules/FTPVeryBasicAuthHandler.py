@@ -1,22 +1,15 @@
 import ftplib
 import urllib
-from urllib.request import FTPHandler
+from urllib.request import FTPHandler, HTTPPasswordMgr
 from urllib.parse import splitport, splituser, unquote
-from getpass import getpass
 
 
 class FTPVeryBasicAuthHandler(FTPHandler):
     '''
     This subclass of urllib.request.FTPHandler implements basic authentication
-    management for FTP connections. Instead of raising an exception when login
-    credentials are required but not provided in the URL, as FTPHandler does,
-    this handler will prompt the user for a username and password and try
-    again. After valid credentials are provided, they are stored so that the
-    user does not need to be prompted again when accessing the same host
-    (unless remember_passwords=False).
-
-    Authentication management is "very" basic compared to standard library
-    classes like HTTPBasicAuthHandler that support password managers.
+    management for FTP connections. Like HTTPBasicAuthHandler, this handler for
+    FTP connections has a password manager that it checks for login credentials
+    before connecting to a server.
 
     This subclass also ensures that file size is included in the response
     header, which can fail for some FTP servers if the original FTPHandler is
@@ -26,24 +19,26 @@ class FTPVeryBasicAuthHandler(FTPHandler):
     to urllib.request.urlopen('ftp://...') will use it automatically:
 
     >>> handler = FTPVeryBasicAuthHandler()
+    >>> handler.add_password(None, uri, user, passwd)  # realm must be None
     >>> opener = urllib.request.build_opener(handler)
     >>> urllib.request.install_opener(opener)
     '''
 
-    def __init__(self, remember_passwords=True, max_bad_login_attempts=3):
+    def __init__(self, password_mgr=None):
 
-        self.remember_passwords = remember_passwords
-        self.max_bad_login_attempts = max_bad_login_attempts
-        self.passwd = {}
+        if password_mgr is None:
+            password_mgr = HTTPPasswordMgr()
+        self.passwd = password_mgr
+        self.add_password = self.passwd.add_password
         return super().__init__()
 
     def ftp_open(self, req):
         '''
         When ftp requests are made using this handler, this function gets
-        called at some point, and it calls the connect_ftp method. In this
-        subclass's reimplementation of connect_ftp, the FQDN of the request's
-        host is needed to show the user which system they should enter
-        credentials for. However, by the time connect_ftp is called, that
+        called at some point, and it in turn calls the connect_ftp method. In
+        this subclass's reimplementation of connect_ftp, the FQDN of the
+        request's host is needed for looking up login credentials in the
+        password manager. However, by the time connect_ftp is called, that
         information has been stripped away, and the host argument passed to
         connect_ftp contains only the host's IP address instead of the FQDN.
         This reimplementation of ftp_open, which is little more than a
@@ -140,58 +135,26 @@ class FTPVeryBasicAuthHandler(FTPHandler):
         '''
         Unless authentication credentials are provided in the request URL
         (ftp://user:passwd@host/path), this method will be called with empty
-        user and passwd arguments. If the host requires authentication, the
-        superclass's implementation of connect_ftp will fail and raise an
-        exception. This reimplementation of connect_ftp catches exceptions
-        related to login authentication and prompts the user for credentials
-        before retrying automatically. If the host accepts the credentials,
-        they are stored so that future connections to the same host do not
-        require user input.
+        user and passwd arguments. In that case, this reimplementation of
+        connect_ftp checks the password manager for credentials matching the
+        last_req_host (the host argument will be an IP address instead of the
+        FQDN and is thereby useless if the password manager is keyed by FQDN).
         '''
 
-        login_needed = False
-        bad_login_attempts = 0
-
-        while True:
-            try:
-                fw = super().connect_ftp(user, passwd, host, port, dirs, timeout)
-                if login_needed and host not in self.passwd:
-                    print('Login successful')
-                    if self.remember_passwords:
-                        self.passwd[host] = (user, passwd)
-                return fw
-            except ftplib.all_errors as e:
-                if e.args[0] == '530 This is a private system - No anonymous login':
-                    pass
-                elif e.args[0] == '530 Login authentication failed':
-                    bad_login_attempts += 1
-                    print('Bad login credentials (attempt {} of {})'.format(
-                        bad_login_attempts, self.max_bad_login_attempts))
-                elif e.args[0] == '553 User not allow':
-                    bad_login_attempts += 1
-                    print('User {} does not have permission (attempt {} of {})'.format(
-                        user, bad_login_attempts, self.max_bad_login_attempts))
-                else:
-                    print('Cannot connect: {}'.format(e))
-                    raise
-
-                if bad_login_attempts >= self.max_bad_login_attempts:
-                    print('Aborting login')
-                    raise
-
-                login_needed = True
-                if host in self.passwd:
-                    user, passwd = self.passwd[host]
-                else:
-                    user = input('User name on {}: '.format(self.last_req_host))
-                    passwd = getpass('Password: ')
+        if not user and not passwd:
+            user, passwd = self.passwd.find_user_password(None, self.last_req_host)
+        return super().connect_ftp(user, passwd, host, port, dirs, timeout)
 
 
-def setup(remember_passwords=True, max_bad_login_attempts=3):
+def setup():
     '''
     Install FTPVeryBasicAuthHandler as the global default FTP handler
+
+    Note that install_opener will remove all other non-default handlers
+    installed in a different opener, such as an HTTPBasicAuthHandler.
     '''
 
-    handler = FTPVeryBasicAuthHandler(remember_passwords, max_bad_login_attempts)
+    handler = FTPVeryBasicAuthHandler()
     opener = urllib.request.build_opener(handler)
     urllib.request.install_opener(opener)
+    return handler
