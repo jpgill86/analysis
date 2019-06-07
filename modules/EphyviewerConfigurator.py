@@ -309,7 +309,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
 
             if self.lazy:
                 import neo
-                neorawio = neo.rawio.AxographRawIO(abs_path(self.metadata, 'data_file')) # TODO detect correct RawIO automatically
+                neorawioclass = neo.rawio.get_rawio_class(abs_path(self.metadata, 'data_file'))
+                neorawio = neorawioclass(abs_path(self.metadata, 'data_file'))
                 neorawio.parse_header()
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
                 sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
