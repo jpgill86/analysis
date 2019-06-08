@@ -10,7 +10,7 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from ParseMetadata import LoadMetadata, _selector_labels
+from ParseMetadata import LoadMetadata, _selector_labels, DownloadAllDataFiles
 from ImportData import LoadAndPrepareData
 from EphyviewerConfigurator import EphyviewerConfigurator
 
@@ -68,6 +68,10 @@ class DataExplorer(QT.QMainWindow):
         do_reload_metadata = QT.QAction('&Reload metadata', self, shortcut = 'Ctrl+R')
         do_reload_metadata.triggered.connect(self.populate_metadata_selector)
         self.file_menu.addAction(do_reload_metadata)
+
+        do_download_data = QT.QAction('&Download data', self, shortcut = 'Ctrl+D')
+        do_download_data.triggered.connect(self.download_data)
+        self.file_menu.addAction(do_download_data)
 
         do_launch = QT.QAction('&Launch', self, shortcut = 'Return')
         do_launch.triggered.connect(self.launch)
@@ -137,6 +141,18 @@ class DataExplorer(QT.QMainWindow):
                         item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
             except AssertionError as e:
                 print('Bad metadata file!', e)
+
+    def download_data(self):
+
+        try:
+            key = self.data_set_selector.currentItem().data(QT.StatusTipRole)
+        except AttributeError:
+            # nothing selected yet
+            return
+
+        metadata = self.all_metadata[key]
+
+        DownloadAllDataFiles(metadata)
 
     def launch(self):
 
