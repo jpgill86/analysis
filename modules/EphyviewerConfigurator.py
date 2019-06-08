@@ -313,6 +313,8 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 neorawio = neorawioclass(abs_path(self.metadata, 'data_file'))
                 neorawio.parse_header()
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
+                for p in self.metadata['plots']:
+                    neorawio.header['signal_channels']['name'][p['index']] = p['ylabel']
                 sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
                 # TODO apply ylabels
                 # TODO support scatter
