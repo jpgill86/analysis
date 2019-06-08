@@ -378,7 +378,7 @@ class MetadataSelector(ipywidgets.VBox):
         '''
         Run each time the download button is clicked.
         '''
-        DownloadAllDataFiles(self.selected_metadata)
+        self.download_all_data_files()
 
     @property
     def selected_metadata(self):
@@ -386,6 +386,24 @@ class MetadataSelector(ipywidgets.VBox):
         The access point for the selected metadata set.
         '''
         return self.all_metadata[self.selector.value]
+
+    def abs_path(self, file):
+        '''
+        Convert the relative path of file to an absolute path using data_dir
+        '''
+        return abs_path(self.selected_metadata, file)
+
+    def abs_url(self, file):
+        '''
+        Convert the relative path of file to a full URL using remote_data_dir
+        '''
+        return abs_url(self.selected_metadata, file)
+
+    def download_all_data_files(self):
+        '''
+        Download all files associated with metadata
+        '''
+        DownloadAllDataFiles(self.selected_metadata)
 
     def __iter__(self, *args):
         '''
