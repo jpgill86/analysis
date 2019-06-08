@@ -13,13 +13,13 @@ import neo
 from ParseMetadata import abs_path
 from neo.test.generate_datasets import fake_neo
 
-def LoadAndPrepareData(metadata, lazy=False, fake_data_for_testing = False):
+def LoadAndPrepareData(metadata, lazy=False, signal_group_mode='split-all', fake_data_for_testing = False):
     '''
 
     '''
 
     # read in the electrophysiology data
-    blk = ReadDataFile(metadata, lazy)
+    blk = ReadDataFile(metadata, lazy, signal_group_mode)
     # blk = CreateNeoBlockExample()
 
     # apply filters to signals if not using lazy loading of signals
@@ -55,14 +55,16 @@ def LoadAndPrepareData(metadata, lazy=False, fake_data_for_testing = False):
 
     return blk
 
-def ReadDataFile(metadata, lazy=False):
+def ReadDataFile(metadata, lazy=False, signal_group_mode='split-all'):
     '''
 
     '''
 
     # read in the electrophysiology data
+    # - signal_group_mode='split-all' ensures every channel gets its own
+    #   AnalogSignal, which is important for indexing in EphyviewerConfigurator
     io = neo.io.get_io(abs_path(metadata, 'data_file'))
-    blk = io.read_block(lazy=lazy)
+    blk = io.read_block(lazy=lazy, signal_group_mode=signal_group_mode)
 
     # load all proxy objects except analog signals
     if lazy:

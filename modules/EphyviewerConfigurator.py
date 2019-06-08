@@ -312,6 +312,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 neorawioclass = neo.rawio.get_rawio_class(abs_path(self.metadata, 'data_file'))
                 neorawio = neorawioclass(abs_path(self.metadata, 'data_file'))
                 neorawio.parse_header()
+                neorawio.header['signal_channels']['group_id'] = 0 # dirty trick for getting ungrouped channels into a single source
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
                 for p in self.metadata['plots']:
                     neorawio.header['signal_channels']['name'][p['index']] = p['ylabel']
