@@ -59,7 +59,25 @@ class MetadataSelectorQt(MetadataManager, QT.QListWidget):
                 self.setCurrentRow(0)
 
 
+class DownloadWorker(QT.QObject):
+
+    download_finished = QT.pyqtSignal()
+
+    def __init__(self, metadata_selector):
+
+        QT.QObject.__init__(self)
+
+        self.metadata_selector = metadata_selector
+
+    def download(self):
+
+        self.metadata_selector.download_all_data_files()
+        self.download_finished.emit()
+
+
 class DataExplorer(QT.QMainWindow):
+
+    request_download = QT.pyqtSignal()
 
     def __init__(self, lazy=True, theme='light', support_increased_line_width=False):
 
@@ -90,6 +108,14 @@ class DataExplorer(QT.QMainWindow):
         self.metadata_selector = MetadataSelectorQt()
         self.setCentralWidget(self.metadata_selector)
 
+        # create a worker thread for downloading data
+        self.download_thread = QT.QThread()
+        self.download_worker = DownloadWorker(self.metadata_selector)
+        self.download_worker.moveToThread(self.download_thread)
+        self.download_thread.start()
+        self.request_download.connect(self.download_worker.download)
+        self.download_worker.download_finished.connect(self.on_download_finished)
+
         # construct the menus
         self.create_menus()
 
@@ -109,9 +135,9 @@ class DataExplorer(QT.QMainWindow):
         do_reload_metadata.triggered.connect(self.metadata_selector.load)
         self.file_menu.addAction(do_reload_metadata)
 
-        do_download_data = QT.QAction('&Download data', self, shortcut = 'Ctrl+D')
-        do_download_data.triggered.connect(self.metadata_selector.download_all_data_files)
-        self.file_menu.addAction(do_download_data)
+        self.do_download_data = QT.QAction('&Download data', self, shortcut = 'Ctrl+D')
+        self.do_download_data.triggered.connect(self.download_files)
+        self.file_menu.addAction(self.do_download_data)
 
         do_launch = QT.QAction('&Launch', self, shortcut = 'Return')
         do_launch.triggered.connect(self.launch)
@@ -169,6 +195,18 @@ class DataExplorer(QT.QMainWindow):
         if file:
             self.metadata_selector.file = file
             self.metadata_selector.load()
+
+    def download_files(self):
+
+        self.request_download.emit()
+        self.do_download_data.setText('&Download in progress!')
+        self.do_download_data.setEnabled(False)
+
+    def on_download_finished(self):
+
+        self.metadata_selector.load()
+        self.do_download_data.setText('&Download data')
+        self.do_download_data.setEnabled(True)
 
     def launch(self):
 
