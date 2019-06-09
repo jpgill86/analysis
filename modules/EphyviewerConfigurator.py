@@ -133,7 +133,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         self.lazy = lazy
 
         # initialize the box
-        super(ipywidgets.HBox, self).__init__()
+        ipywidgets.HBox.__init__(self)
 
         # create buttons for controlling which elements to show
         self.controls = OrderedDict()
