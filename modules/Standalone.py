@@ -10,9 +10,54 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from ParseMetadata import LoadMetadata, _selector_labels, DownloadAllDataFiles
+from ParseMetadata import MetadataManager, _selector_labels
 from ImportData import LoadAndPrepareData
 from EphyviewerConfigurator import EphyviewerConfigurator
+
+
+class MetadataSelectorQt(MetadataManager, QT.QListWidget):
+
+    def __init__(self):
+        MetadataManager.__init__(self)
+        QT.QListWidget.__init__(self)
+
+        self.setSelectionMode(QT.QListWidget.SingleSelection)
+        self.setStyleSheet('font: 9pt Courier;')
+
+        self.currentRowChanged.connect(self._on_select)
+
+    def _on_select(self, currentRow):
+
+        if currentRow >= 0:
+            self._selection = list(self.all_metadata)[currentRow]
+        else:
+            self._selection = None
+
+    def load(self):
+
+        # remember the current selection
+        old_selection = self._selection
+
+        try:
+            MetadataManager.load(self)
+        except AssertionError as e:
+            print('Bad metadata file!', e)
+
+        if self.all_metadata is not None:
+
+            # clear and repopulate the list,
+            # which triggers the selection to change
+            self.clear()
+            for label in _selector_labels(self.all_metadata):
+                QT.QListWidgetItem(label, self)
+
+            if old_selection in self.all_metadata:
+                # reselect the original selection if it still exists
+                self.setCurrentRow(list(self.all_metadata).index(old_selection))
+            else:
+                # otherwise select the first item
+                self.setCurrentRow(0)
+
 
 class DataExplorer(QT.QMainWindow):
 
@@ -41,21 +86,16 @@ class DataExplorer(QT.QMainWindow):
         # function that spawned them returns
         self.windows = []
 
-        # initialize metadata list to empty
-        self.all_metadata = {}
-
         # metadata selector
-        self.data_set_selector = QT.QListWidget()
-        self.data_set_selector.setSelectionMode(QT.QListWidget.SingleSelection)
-        self.data_set_selector.setStyleSheet('font: 9pt Courier;')
-        self.setCentralWidget(self.data_set_selector)
+        self.metadata_selector = MetadataSelectorQt()
+        self.setCentralWidget(self.metadata_selector)
 
         # construct the menus
         self.create_menus()
 
         # open example metadata file
-        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
-        self.populate_metadata_selector()
+        self.metadata_selector.file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
+        self.metadata_selector.load()
 
     def create_menus(self):
 
@@ -66,11 +106,11 @@ class DataExplorer(QT.QMainWindow):
         self.file_menu.addAction(do_open_metadata)
 
         do_reload_metadata = QT.QAction('&Reload metadata', self, shortcut = 'Ctrl+R')
-        do_reload_metadata.triggered.connect(self.populate_metadata_selector)
+        do_reload_metadata.triggered.connect(self.metadata_selector.load)
         self.file_menu.addAction(do_reload_metadata)
 
         do_download_data = QT.QAction('&Download data', self, shortcut = 'Ctrl+D')
-        do_download_data.triggered.connect(self.download_data)
+        do_download_data.triggered.connect(self.metadata_selector.download_all_data_files)
         self.file_menu.addAction(do_download_data)
 
         do_launch = QT.QAction('&Launch', self, shortcut = 'Return')
@@ -120,49 +160,19 @@ class DataExplorer(QT.QMainWindow):
 
     def open_metadata(self):
 
-        self.filename, _ = QT.QFileDialog.getOpenFileName(
+        file, _ = QT.QFileDialog.getOpenFileName(
             parent=self,
             caption='Open metadata',
             directory=None,
             filter='YAML files (*.yml *.yaml)')
 
-        self.populate_metadata_selector()
-
-    def populate_metadata_selector(self):
-
-        if self.filename:
-            try:
-                self.all_metadata = LoadMetadata(self.filename)
-                if self.all_metadata:
-                    self.data_set_selector.clear()
-                    all_labels = _selector_labels(self.all_metadata)
-                    for i, key in enumerate(self.all_metadata):
-                        item = QT.QListWidgetItem(all_labels[i], self.data_set_selector)
-                        item.setData(QT.StatusTipRole, key) # use of StatusTipRole is hacky
-            except AssertionError as e:
-                print('Bad metadata file!', e)
-
-    def download_data(self):
-
-        try:
-            key = self.data_set_selector.currentItem().data(QT.StatusTipRole)
-        except AttributeError:
-            # nothing selected yet
-            return
-
-        metadata = self.all_metadata[key]
-
-        DownloadAllDataFiles(metadata)
+        if file:
+            self.metadata_selector.file = file
+            self.metadata_selector.load()
 
     def launch(self):
 
-        try:
-            key = self.data_set_selector.currentItem().data(QT.StatusTipRole)
-        except AttributeError:
-            # nothing selected yet
-            return
-
-        metadata = self.all_metadata[key]
+        metadata = self.metadata_selector.selected_metadata
 
         try:
 

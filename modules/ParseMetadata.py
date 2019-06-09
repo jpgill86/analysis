@@ -568,11 +568,13 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
         self.load()
 
         if self.all_metadata is not None:
+            # remember the current selection
             old_selection = self._selection
 
             # changing the options triggers the selection to change
             self.selector.options = zip(_selector_labels(self.all_metadata), self.all_metadata.keys())
 
+            # reselect the original selection if it still exists
             if old_selection in self.all_metadata:
                 self.selector.value = old_selection
 
