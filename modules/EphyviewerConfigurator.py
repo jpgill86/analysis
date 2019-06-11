@@ -587,6 +587,6 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 widget.setCurrentIndex(0)
 
         # set amount of time shown initially
-        win.set_xsize(40) # seconds
+        win.set_xsize(self.metadata['t_width']) # seconds
 
         return win
