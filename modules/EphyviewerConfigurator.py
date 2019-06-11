@@ -312,13 +312,30 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 neorawioclass = neo.rawio.get_rawio_class(abs_path(self.metadata, 'data_file'))
                 neorawio = neorawioclass(abs_path(self.metadata, 'data_file'))
                 neorawio.parse_header()
-                neorawio.header['signal_channels']['group_id'] = 0 # dirty trick for getting ungrouped channels into a single source
+
+                # Intan-specific tricks
+                if type(neorawio) is neo.rawio.IntanRawIO:
+                    # dirty trick for getting ungrouped channels into a single source
+                    neorawio.header['signal_channels']['group_id'] = 0
+
+                    # prepare to append custom channel names stored in data file to ylabels
+                    custom_channel_names = {c['native_channel_name']: c['custom_channel_name'] for c in neorawio._ordered_channels}
+
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
                 sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
 
                 # modify loaded channel names to use ylabels
                 for i, p in enumerate(self.metadata['plots']):
-                    sources['signal'][-1].channels['name'][i] = p['ylabel']
+
+                    ylabel = p['ylabel']
+
+                    # Intan-specific tricks
+                    if type(neorawio) is neo.rawio.IntanRawIO:
+                        # append custom channel names stored in data file to ylabels
+                        if custom_channel_names[p['channel']] != ylabel:
+                            ylabel += ' ({})'.format(custom_channel_names[p['channel']])
+
+                    sources['signal'][-1].channels['name'][i] = ylabel
 
                 # TODO support scatter
             else:
