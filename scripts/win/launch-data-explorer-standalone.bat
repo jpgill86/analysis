@@ -9,8 +9,10 @@ IF EXIST %USERPROFILE%\Anaconda3 (
 ) ELSE (
 IF EXIST %USERPROFILE%\Miniconda3 (
   SET CONDAROOT=%USERPROFILE%\Miniconda3
+) ELSE (
 IF EXIST C:\ProgramData\Anaconda3 (
   SET CONDAROOT=C:\ProgramData\Anaconda3
+) ELSE (
 IF EXIST C:\ProgramData\Miniconda3 (
   SET CONDAROOT=C:\ProgramData\Miniconda3
 ) ELSE (
@@ -21,7 +23,7 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-cd ..
+CD ..
 python "launch-data-explorer-standalone.py"
 
 IF %ERRORLEVEL% NEQ 0 (
