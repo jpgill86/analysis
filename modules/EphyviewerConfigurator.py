@@ -314,10 +314,12 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 neorawio.parse_header()
                 neorawio.header['signal_channels']['group_id'] = 0 # dirty trick for getting ungrouped channels into a single source
                 channel_indexes = [p['index'] for p in self.metadata['plots']]
-                for p in self.metadata['plots']:
-                    # TODO this ylabel hack breaks IntanRawIO, which depends on names somehow
-                    neorawio.header['signal_channels']['name'][p['index']] = p['ylabel']
                 sources['signal'].append(ephyviewer.AnalogSignalFromNeoRawIOSource(neorawio, channel_indexes))
+
+                # modify loaded channel names to use ylabels
+                for i, p in enumerate(self.metadata['plots']):
+                    sources['signal'][-1].channels['name'][i] = p['ylabel']
+
                 # TODO support scatter
             else:
                 sources['signal'].append(ephyviewer.AnalogSignalSourceWithScatter(
