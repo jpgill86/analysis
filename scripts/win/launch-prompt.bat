@@ -21,6 +21,6 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-CD "%~dp0..\.."
+CD /D "%~dp0..\.."
 
 CMD

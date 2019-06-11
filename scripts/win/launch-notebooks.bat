@@ -21,4 +21,6 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-jupyter notebook "%~dp0..\..\notebooks"
+CD /D "%~dp0..\.."
+
+jupyter notebook "notebooks"
