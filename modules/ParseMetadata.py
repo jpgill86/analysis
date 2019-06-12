@@ -159,6 +159,17 @@ def _defaults_for_key(key):
         #   would correspond to times 1:00, 2:10, 3:20 according to the video
         'video_jumps': None,
 
+        # a factor to multiply the video frame rate by to correct for async
+        # error that accumulates over time at a constant rate
+        # - a value less than 1 will decrease the frame rate and shift video
+        #   events to later times
+        # - a value greater than 1 will increase the frame rate and shift video
+        #   events to earlier times
+        # - a good estimate can be obtained by taking the amount of time
+        #   between two events in the video and dividing by the amount of time
+        #   between the same two events in the data
+        'video_rate_correction': None,
+
         # list the channels in the order they should be plotted
         # - e.g. [{'channel': 'Channel A', 'ylabel': 'My channel', 'ylim': [-120, 120], 'units': 'uV'}, ...]
         'plots': None,

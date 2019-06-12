@@ -528,6 +528,11 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 video_source._t_start = max(min(video_source.t_starts), 0)
                 video_source._t_stop  = max(video_source.t_stops)
 
+            # correct for videos that report frame rates that are too fast or
+            # too slow compared to the clock on the data acquisition system
+            if self.metadata['video_rate_correction'] is not None:
+                video_source.rates[0] *= self.metadata['video_rate_correction']
+
             if self.metadata['video_jumps'] is not None:
 
                 # create an unmodified video_times vector with evenly spaced times
