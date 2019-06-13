@@ -390,9 +390,22 @@ def RunAmplitudeDiscriminators(metadata, blk):
             else:
 
                 sig = blk.segments[0].analogsignals[index]
-                spikes_above_min = elephant.spike_train_generation.peak_detection(sig, discriminator['amplitude'][0]*pq.uV, 'above', 'raw')
-                spikes_above_max = elephant.spike_train_generation.peak_detection(sig, discriminator['amplitude'][1]*pq.uV, 'above', 'raw')
-                spikes_between_min_and_max = np.setdiff1d(spikes_above_min, spikes_above_max)
+                min_threshold = min(discriminator['amplitude'])
+                max_threshold = max(discriminator['amplitude'])
+                if min_threshold >= 0 and max_threshold >= 0:
+                    sign = 'above'
+                elif min_threshold <= 0 and max_threshold <= 0:
+                    sign = 'below'
+                else:
+                    raise ValueError('amplitude discriminator must have two nonnegative thresholds or two nonpositive thresholds: {}'.format(discriminator))
+                spikes_crossing_min = elephant.spike_train_generation.peak_detection(sig, min_threshold*pq.uV, sign, 'raw')
+                spikes_crossing_max = elephant.spike_train_generation.peak_detection(sig, max_threshold*pq.uV, sign, 'raw')
+                if sign == 'above':
+                    spikes_between_min_and_max = np.setdiff1d(spikes_crossing_min, spikes_crossing_max)
+                elif sign == 'below':
+                    spikes_between_min_and_max = np.setdiff1d(spikes_crossing_max, spikes_crossing_min)
+                else:
+                    raise ValueError('sign should be "above" or "below": {}'.format(sign))
 
                 st = neo.SpikeTrain(
                     name = discriminator['name'],
