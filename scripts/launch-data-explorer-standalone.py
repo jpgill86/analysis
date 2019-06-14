@@ -1,9 +1,9 @@
 # add the directory containing modules to the path
 import sys
-sys.path.append('../modules')
+sys.path.append('../..')
 
 from ephyviewer import mkQApp
-from Standalone import DataExplorer
+from analysis.modules.Standalone import DataExplorer
 
 app = mkQApp()
 win = DataExplorer()
