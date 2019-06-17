@@ -311,7 +311,7 @@ def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, samp
 
     '''
 
-    spikes_list = []
+    spiketrain_list = []
 
     if dataframe is not None:
 
@@ -332,9 +332,9 @@ def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, samp
                 t_stop = t_stop,
             )
 
-            spikes_list.append(st)
+            spiketrain_list.append(st)
 
-    return spikes_list
+    return spiketrain_list
 
 def ApplyFilters(metadata, blk):
     '''
@@ -373,11 +373,12 @@ def RunAmplitudeDiscriminators(metadata, blk):
 
     '''
 
-    spikes_list = []
+    spiketrain_list = []
 
     if metadata['amplitude_discriminators'] is not None:
 
         signalNameToIndex = {sig.name:i for i, sig in enumerate(blk.segments[0].analogsignals)}
+        epochs = blk.segments[0].epochs
 
         # classify spikes by amplitude
         for discriminator in metadata['amplitude_discriminators']:
@@ -390,55 +391,67 @@ def RunAmplitudeDiscriminators(metadata, blk):
             else:
 
                 sig = blk.segments[0].analogsignals[index]
-                min_threshold = min(discriminator['amplitude'])
-                max_threshold = max(discriminator['amplitude'])
-                if min_threshold >= 0 and max_threshold >= 0:
-                    sign = 'above'
-                elif min_threshold <= 0 and max_threshold <= 0:
-                    sign = 'below'
-                else:
-                    raise ValueError('amplitude discriminator must have two nonnegative thresholds or two nonpositive thresholds: {}'.format(discriminator))
-                spikes_crossing_min = elephant.spike_train_generation.peak_detection(sig, min_threshold*pq.uV, sign, 'raw')
-                spikes_crossing_max = elephant.spike_train_generation.peak_detection(sig, max_threshold*pq.uV, sign, 'raw')
-                if sign == 'above':
-                    spikes_between_min_and_max = np.setdiff1d(spikes_crossing_min, spikes_crossing_max)
-                elif sign == 'below':
-                    spikes_between_min_and_max = np.setdiff1d(spikes_crossing_max, spikes_crossing_min)
-                else:
-                    raise ValueError('sign should be "above" or "below": {}'.format(sign))
+                st = DetectSpikes(sig, discriminator, epochs)
+                spiketrain_list.append(st)
 
-                st = neo.SpikeTrain(
-                    name = discriminator['name'],
-                    channels = [discriminator['channel']],  # custom annotation
-                    amplitude = discriminator['amplitude'], # custom annotation
-                    times = spikes_between_min_and_max * pq.s,
-                    t_start = sig.t_start,
-                    t_stop  = sig.t_stop,
-                )
+    return spiketrain_list
 
-                if 'epoch' in discriminator:
 
-                    time_masks = []
-                    if isinstance(discriminator['epoch'], str):
-                        # search for matching epochs
-                        ep = next((ep for ep in blk.segments[0].epochs if ep.name == discriminator['epoch']), None)
-                        if ep is not None:
-                            # select spike times that fall within each epoch
-                            for t_start, duration in zip(ep.times, ep.durations):
-                                t_stop = t_start + duration
-                                time_masks.append((t_start <= st) & (st < t_stop))
-                        else:
-                            # no matching epochs found
-                            time_masks.append([False] * len(st))
-                    else:
-                        # will eventually implement lists of ordered pairs, but
-                        # for now raise an error
-                        raise ValueError('amplitude discriminator epoch could not be handled: {}'.format(discriminator['epoch']))
+def DetectSpikes(sig, discriminator, epochs):
+    '''
 
-                    # select the subset of spikes that fall within the epoch
-                    # windows
-                    st = st[np.any(time_masks, axis=0)]
+    '''
 
-                spikes_list.append(st)
+    assert sig.name == discriminator['channel'], 'sig name "{}" does not match amplitude discriminator channel "{}"'.format(sig.name, discriminator['channel'])
 
-    return spikes_list
+    min_threshold = min(discriminator['amplitude'])
+    max_threshold = max(discriminator['amplitude'])
+    if min_threshold >= 0 and max_threshold > 0:
+        sign = 'above'
+    elif min_threshold < 0 and max_threshold <= 0:
+        sign = 'below'
+    else:
+        raise ValueError('amplitude discriminator must have two nonnegative thresholds or two nonpositive thresholds: {}'.format(discriminator))
+
+    spikes_crossing_min = elephant.spike_train_generation.peak_detection(sig, min_threshold*pq.uV, sign, 'raw')
+    spikes_crossing_max = elephant.spike_train_generation.peak_detection(sig, max_threshold*pq.uV, sign, 'raw')
+    if sign == 'above':
+        spikes_between_min_and_max = np.setdiff1d(spikes_crossing_min, spikes_crossing_max)
+    elif sign == 'below':
+        spikes_between_min_and_max = np.setdiff1d(spikes_crossing_max, spikes_crossing_min)
+    else:
+        raise ValueError('sign should be "above" or "below": {}'.format(sign))
+
+    st = neo.SpikeTrain(
+        name = discriminator['name'],
+        channels = [discriminator['channel']],  # custom annotation
+        amplitude = discriminator['amplitude'], # custom annotation
+        times = spikes_between_min_and_max * pq.s,
+        t_start = sig.t_start,
+        t_stop  = sig.t_stop,
+    )
+
+    if 'epoch' in discriminator:
+
+        time_masks = []
+        if isinstance(discriminator['epoch'], str):
+            # search for matching epochs
+            ep = next((ep for ep in epochs if ep.name == discriminator['epoch']), None)
+            if ep is not None:
+                # select spike times that fall within each epoch
+                for t_start, duration in zip(ep.times, ep.durations):
+                    t_stop = t_start + duration
+                    time_masks.append((t_start <= st) & (st < t_stop))
+            else:
+                # no matching epochs found
+                time_masks.append([False] * len(st))
+        else:
+            # may eventually implement lists of ordered pairs, but
+            # for now raise an error
+            raise ValueError('amplitude discriminator epoch could not be handled: {}'.format(discriminator['epoch']))
+
+        # select the subset of spikes that fall within the epoch
+        # windows
+        st = st[np.any(time_masks, axis=0)]
+
+    return st
