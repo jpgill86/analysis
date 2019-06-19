@@ -23,8 +23,9 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-CD /D ..
-python "launch-data-explorer-standalone.py"
+CD /D "%~dp0..\.."
+
+python -m modules
 
 IF %ERRORLEVEL% NEQ 0 (
    PAUSE
