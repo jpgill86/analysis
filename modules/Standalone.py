@@ -112,7 +112,6 @@ class DataExplorer(QT.QMainWindow):
         self.download_thread = QT.QThread()
         self.download_worker = DownloadWorker(self.metadata_selector)
         self.download_worker.moveToThread(self.download_thread)
-        self.download_thread.start()
         self.request_download.connect(self.download_worker.download)
         self.download_worker.download_finished.connect(self.on_download_finished)
 
@@ -198,12 +197,14 @@ class DataExplorer(QT.QMainWindow):
 
     def download_files(self):
 
+        self.download_thread.start()
         self.request_download.emit()
         self.do_download_data.setText('&Download in progress!')
         self.do_download_data.setEnabled(False)
 
     def on_download_finished(self):
 
+        self.download_thread.quit()
         self.metadata_selector.load()
         self.do_download_data.setText('&Download data')
         self.do_download_data.setEnabled(True)
