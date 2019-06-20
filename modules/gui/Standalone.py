@@ -10,8 +10,8 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from .ParseMetadata import MetadataManager, _selector_labels
-from .ImportData import LoadAndPrepareData
+from ..io.ParseMetadata import MetadataManager, _selector_labels
+from ..io.ImportData import LoadAndPrepareData
 from .EphyviewerConfigurator import EphyviewerConfigurator
 
 
@@ -83,7 +83,7 @@ class DataExplorer(QT.QMainWindow):
 
         QT.QMainWindow.__init__(self)
 
-        self.setWindowIcon(QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'icons', 'soundwave.png')))
+        self.setWindowIcon(QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'scripts', 'icons', 'soundwave.png')))
 
         self.setWindowTitle('Data Explorer')
         self.resize(600, 300)
@@ -119,7 +119,7 @@ class DataExplorer(QT.QMainWindow):
         self.create_menus()
 
         # open example metadata file
-        self.metadata_selector.file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', 'metadata.yml')
+        self.metadata_selector.file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'example', 'metadata.yml')
         self.metadata_selector.load()
 
     def create_menus(self):

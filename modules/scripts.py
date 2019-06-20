@@ -1,6 +1,6 @@
 def launch_standalone():
     from ephyviewer import mkQApp
-    from .Standalone import DataExplorer
+    from .gui.Standalone import DataExplorer
 
     app = mkQApp()
     win = DataExplorer()
