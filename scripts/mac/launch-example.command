@@ -8,4 +8,6 @@ source $CONDAROOT/etc/profile.d/conda.sh
 
 conda activate "$CONDAENV"
 
-jupyter notebook "$(dirname "$0")/../../example/Data Explorer.ipynb"
+cd "$(dirname "$0")/../.."
+
+jupyter notebook "example/Data Explorer.ipynb"

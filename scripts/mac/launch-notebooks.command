@@ -8,4 +8,6 @@ source $CONDAROOT/etc/profile.d/conda.sh
 
 conda activate "$CONDAENV"
 
-jupyter notebook "$(dirname "$0")/../../notebooks"
+cd "$(dirname "$0")/../.."
+
+jupyter notebook "notebooks"
