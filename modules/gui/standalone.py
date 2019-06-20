@@ -10,8 +10,7 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from ..io.metadata import MetadataManager, _selector_labels
-from ..io.data import LoadAndPrepareData
+from ..io import MetadataManager, LoadAndPrepareData, selector_labels
 from ..gui.config import EphyviewerConfigurator
 
 
@@ -48,7 +47,7 @@ class MetadataSelectorQt(MetadataManager, QT.QListWidget):
             # clear and repopulate the list,
             # which triggers the selection to change
             self.clear()
-            for label in _selector_labels(self.all_metadata):
+            for label in selector_labels(self.all_metadata):
                 QT.QListWidgetItem(label, self)
 
             if old_selection in self.all_metadata:

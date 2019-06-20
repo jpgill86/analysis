@@ -286,7 +286,7 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root
 
     return md
 
-def _selector_labels(all_metadata):
+def selector_labels(all_metadata):
 
     # indicate presence of local data files with symbols
     has_local_data = {}
@@ -526,7 +526,7 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
 
         if self.all_metadata is not None:
             # create display text for the selector from keys and descriptions
-            self.selector.options = zip(_selector_labels(self.all_metadata), self.all_metadata.keys())
+            self.selector.options = zip(selector_labels(self.all_metadata), self.all_metadata.keys())
 
             # set initial selection
             if self._selection is None:
@@ -586,7 +586,7 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
             old_selection = self._selection
 
             # changing the options triggers the selection to change
-            self.selector.options = zip(_selector_labels(self.all_metadata), self.all_metadata.keys())
+            self.selector.options = zip(selector_labels(self.all_metadata), self.all_metadata.keys())
 
             # reselect the original selection if it still exists
             if old_selection in self.all_metadata:
