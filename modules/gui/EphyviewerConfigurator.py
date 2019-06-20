@@ -273,7 +273,7 @@ class EphyviewerConfigurator(ipywidgets.HBox):
             play_interval = 0.1, # refresh period in seconds
         )
         win.setWindowTitle(self.metadata['key'])
-        win.setWindowIcon(ephyviewer.QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'icons', 'soundwave.png')))
+        win.setWindowIcon(ephyviewer.QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons', 'soundwave.png')))
 
         ########################################################################
         # PREPARE TRACE PARAMETERS

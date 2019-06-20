@@ -83,7 +83,7 @@ class DataExplorer(QT.QMainWindow):
 
         QT.QMainWindow.__init__(self)
 
-        self.setWindowIcon(QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'scripts', 'icons', 'soundwave.png')))
+        self.setWindowIcon(QT.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons', 'soundwave.png')))
 
         self.setWindowTitle('Data Explorer')
         self.resize(600, 300)
