@@ -10,7 +10,7 @@ import yaml
 import ipywidgets
 from IPython.display import HTML
 
-from .Downloads import safe_download
+from ..io.download import safe_download
 
 
 def abs_path(metadata, file):

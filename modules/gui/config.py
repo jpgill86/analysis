@@ -13,9 +13,9 @@ import quantities as pq
 import ephyviewer
 import ipywidgets
 
-from ..io.ParseMetadata import abs_path
-from ..NeoUtilities import EstimateVideoJumpTimes, NeoEpochToDataFrame
-from .MyWritableEpochSource import MyWritableEpochSource
+from ..io.metadata import abs_path
+from ..utils import EstimateVideoJumpTimes, NeoEpochToDataFrame
+from ..gui.epochencoder import MyWritableEpochSource
 
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
 

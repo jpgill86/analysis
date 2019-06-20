@@ -10,9 +10,9 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from ..io.ParseMetadata import MetadataManager, _selector_labels
-from ..io.ImportData import LoadAndPrepareData
-from .EphyviewerConfigurator import EphyviewerConfigurator
+from ..io.metadata import MetadataManager, _selector_labels
+from ..io.data import LoadAndPrepareData
+from ..gui.config import EphyviewerConfigurator
 
 
 class MetadataSelectorQt(MetadataManager, QT.QListWidget):
