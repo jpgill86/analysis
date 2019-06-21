@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
-'''
+# -*- coding: utf-8 -*-
+"""
 Tools for working with Neo objects
-'''
+"""
 
 import re
 import numpy as np
@@ -12,7 +11,7 @@ import elephant
 from pylttb import lttb
 
 class CausalAlphaKernel(elephant.kernels.AlphaKernel):
-    '''
+    """
     This modified version of elephant.kernels.AlphaKernel shifts time such that
     convolution of the kernel with spike trains (as in
     elephant.statistics.instantaneous_rate) results in alpha functions that
@@ -21,11 +20,11 @@ class CausalAlphaKernel(elephant.kernels.AlphaKernel):
     AlphaKernel. Consequently, CausalAlphaKernel can be used in causal filters.
 
     Derived from:
-    '''
+    """
     __doc__ += elephant.kernels.AlphaKernel.__doc__
 
     def median_index(self, t):
-        '''
+        """
         In CausalAlphaKernel, "median_index" is a misnomer. Instead of returning
         the index into t that gives half area above and half below (median), it
         returns the index for the first non-negative time, which always
@@ -34,14 +33,14 @@ class CausalAlphaKernel(elephant.kernels.AlphaKernel):
         entire alpha function is located to the right of each spike time.
 
         Overrides the following:
-        '''
+        """
         return np.nonzero(t >= 0)[0].min()
     median_index.__doc__ += elephant.kernels.AlphaKernel.median_index.__doc__
 
 def DownsampleNeoSignal(sig, decimation_factor):
-    '''
+    """
 
-    '''
+    """
 
     assert sig.shape[1] == 1, 'Can only downsample single-channel signals'
 
@@ -62,9 +61,9 @@ def DownsampleNeoSignal(sig, decimation_factor):
     return sig_downsampled
 
 def NeoEpochToDataFrame(neo_epochs, exclude_epoch_encoder_epochs=False):
-    '''
+    """
 
-    '''
+    """
 
     dtypes = {
         'Start (s)':    float,
@@ -82,9 +81,9 @@ def NeoEpochToDataFrame(neo_epochs, exclude_epoch_encoder_epochs=False):
     return df.astype(dtype=dtypes).sort_values(['Start (s)', 'End (s)', 'Type', 'Label']).reset_index(drop=True)
 
 def BehaviorsDataFrame(neo_epochs, behavior_query, subepoch_queries):
-    '''
+    """
 
-    '''
+    """
 
     # filter epochs to obtain the behaviors
     df = NeoEpochToDataFrame(neo_epochs)
@@ -130,14 +129,14 @@ def BehaviorsDataFrame(neo_epochs, behavior_query, subepoch_queries):
     return df
 
 def EstimateVideoJumpTimes(blk):
-    '''
+    """
     Estimate how much time to skip in video playback if AxoGraph was temporarily
     paused during data acquisition while the video continued to record. Returns
     a list of ordered pairs suitable for the video_jumps metadata parameter. The
     returned stop times are exact, but pause durations have only whole-second
     precision and should be manually refined by inspecting the video before
     using.
-    '''
+    """
 
     if 'notes' not in blk.annotations:
         return None

@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
 
-'''
-
-'''
+"""
 
 import os
 
@@ -15,8 +14,15 @@ from ..gui.config import EphyviewerConfigurator
 
 
 class MetadataSelectorQt(MetadataManager, QT.QListWidget):
+    """
+
+    """
 
     def __init__(self):
+        """
+
+        """
+
         MetadataManager.__init__(self)
         QT.QListWidget.__init__(self)
 
@@ -26,6 +32,9 @@ class MetadataSelectorQt(MetadataManager, QT.QListWidget):
         self.currentRowChanged.connect(self._on_select)
 
     def _on_select(self, currentRow):
+        """
+
+        """
 
         if currentRow >= 0:
             self._selection = list(self.all_metadata)[currentRow]
@@ -33,6 +42,9 @@ class MetadataSelectorQt(MetadataManager, QT.QListWidget):
             self._selection = None
 
     def load(self):
+        """
+
+        """
 
         # remember the current selection
         old_selection = self._selection
@@ -59,26 +71,41 @@ class MetadataSelectorQt(MetadataManager, QT.QListWidget):
 
 
 class DownloadWorker(QT.QObject):
+    """
+
+    """
 
     download_finished = QT.pyqtSignal()
 
     def __init__(self, metadata_selector):
+        """
+
+        """
 
         QT.QObject.__init__(self)
 
         self.metadata_selector = metadata_selector
 
     def download(self):
+        """
+
+        """
 
         self.metadata_selector.download_all_data_files()
         self.download_finished.emit()
 
 
 class DataExplorer(QT.QMainWindow):
+    """
+
+    """
 
     request_download = QT.pyqtSignal()
 
     def __init__(self, lazy=True, theme='light', support_increased_line_width=False):
+        """
+
+        """
 
         QT.QMainWindow.__init__(self)
 
@@ -122,6 +149,9 @@ class DataExplorer(QT.QMainWindow):
         self.metadata_selector.load()
 
     def create_menus(self):
+        """
+
+        """
 
         self.file_menu = self.menuBar().addMenu(self.tr('&File'))
 
@@ -183,6 +213,9 @@ class DataExplorer(QT.QMainWindow):
             raise ValueError('theme "{}" is unrecognized'.format(self.theme))
 
     def open_metadata(self):
+        """
+
+        """
 
         file, _ = QT.QFileDialog.getOpenFileName(
             parent=self,
@@ -195,6 +228,9 @@ class DataExplorer(QT.QMainWindow):
             self.metadata_selector.load()
 
     def download_files(self):
+        """
+
+        """
 
         self.download_thread.start()
         self.request_download.emit()
@@ -202,6 +238,9 @@ class DataExplorer(QT.QMainWindow):
         self.do_download_data.setEnabled(False)
 
     def on_download_finished(self):
+        """
+
+        """
 
         self.download_thread.quit()
         self.metadata_selector.load()
@@ -209,6 +248,9 @@ class DataExplorer(QT.QMainWindow):
         self.do_download_data.setEnabled(True)
 
     def launch(self):
+        """
+
+        """
 
         metadata = self.metadata_selector.selected_metadata
 
@@ -237,16 +279,31 @@ class DataExplorer(QT.QMainWindow):
             return
 
     def toggle_lazy(self, checked):
+        """
+
+        """
         self.lazy = checked
 
     def toggle_support_increased_line_width(self, checked):
+        """
+
+        """
         self.support_increased_line_width = checked
 
     def select_light_theme(self):
+        """
+
+        """
         self.theme = 'light'
 
     def select_dark_theme(self):
+        """
+
+        """
         self.theme = 'dark'
 
     def select_original_theme(self):
+        """
+
+        """
         self.theme = 'original'

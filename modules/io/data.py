@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
-'''
+# -*- coding: utf-8 -*-
+"""
 Import raw data, annotations, and spike sorting results as Neo objects
-'''
+"""
 
 import numpy as np
 import pandas as pd
@@ -14,9 +13,9 @@ from ..io.metadata import abs_path
 from neo.test.generate_datasets import fake_neo
 
 def LoadAndPrepareData(metadata, lazy=False, signal_group_mode='split-all', fake_data_for_testing = False):
-    '''
+    """
 
-    '''
+    """
 
     # read in the electrophysiology data
     blk = ReadDataFile(metadata, lazy, signal_group_mode)
@@ -56,9 +55,9 @@ def LoadAndPrepareData(metadata, lazy=False, signal_group_mode='split-all', fake
     return blk
 
 def ReadDataFile(metadata, lazy=False, signal_group_mode='split-all'):
-    '''
+    """
 
-    '''
+    """
 
     # read in the electrophysiology data
     # - signal_group_mode='split-all' ensures every channel gets its own
@@ -93,9 +92,9 @@ def ReadDataFile(metadata, lazy=False, signal_group_mode='split-all'):
     return blk
 
 def ReadAnnotationsFile(metadata):
-    '''
+    """
 
-    '''
+    """
 
     if metadata['annotations_file'] is None:
 
@@ -156,9 +155,9 @@ def ReadAnnotationsFile(metadata):
         return df
 
 def ReadEpochEncoderFile(metadata):
-    '''
+    """
 
-    '''
+    """
 
     if metadata['epoch_encoder_file'] is None:
 
@@ -224,9 +223,9 @@ def ReadEpochEncoderFile(metadata):
         return df
 
 def ReadSpikesFile(metadata, blk):
-    '''
+    """
     Read in spikes identified by spike sorting with tridesclous.
-    '''
+    """
 
     if metadata['tridesclous_file'] is None or metadata['tridesclous_channels'] is None:
 
@@ -253,9 +252,9 @@ def ReadSpikesFile(metadata, blk):
         return df
 
 def CreateNeoEpochsFromDataframe(dataframe, metadata, file_origin):
-    '''
+    """
 
-    '''
+    """
 
     epochs_list = []
 
@@ -282,9 +281,9 @@ def CreateNeoEpochsFromDataframe(dataframe, metadata, file_origin):
     return epochs_list
 
 def CreateNeoEventsFromDataframe(dataframe, metadata, file_origin):
-    '''
+    """
 
-    '''
+    """
 
     events_list = []
 
@@ -307,9 +306,9 @@ def CreateNeoEventsFromDataframe(dataframe, metadata, file_origin):
     return events_list
 
 def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, sampling_period):
-    '''
+    """
 
-    '''
+    """
 
     spiketrain_list = []
 
@@ -337,9 +336,9 @@ def CreateNeoSpikeTrainsFromDataframe(dataframe, metadata, t_start, t_stop, samp
     return spiketrain_list
 
 def ApplyFilters(metadata, blk):
-    '''
+    """
 
-    '''
+    """
 
     if metadata['filters'] is not None:
 
@@ -369,9 +368,9 @@ def ApplyFilters(metadata, blk):
     return blk
 
 def RunAmplitudeDiscriminators(metadata, blk):
-    '''
+    """
 
-    '''
+    """
 
     spiketrain_list = []
 
@@ -398,9 +397,9 @@ def RunAmplitudeDiscriminators(metadata, blk):
 
 
 def DetectSpikes(sig, discriminator, epochs):
-    '''
+    """
 
-    '''
+    """
 
     assert sig.name == discriminator['channel'], 'sig name "{}" does not match amplitude discriminator channel "{}"'.format(sig.name, discriminator['channel'])
 

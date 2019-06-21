@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+
+"""
+
 def launch_standalone():
+    """
+
+    """
+
     from ephyviewer import mkQApp
     from .gui.standalone import DataExplorer
 

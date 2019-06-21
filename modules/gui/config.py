@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
 
-'''
-
-'''
+"""
 
 import os
 from collections import OrderedDict
@@ -20,11 +19,11 @@ from ..gui.epochencoder import MyWritableEpochSource
 pq.mN = pq.UnitQuantity('millinewton', pq.N/1e3, symbol = 'mN');  # define millinewton
 
 def _fix_FrameGrabber_set_file(set_file_func):
-    '''
+    """
     For some video files, ephyviewer sets the incorrect start_time for its
     FrameGrabber when the set_file method is called. This monkey patch works
     around the problem by resetting start_time to 0 after set_file is called.
-    '''
+    """
     @wraps(set_file_func)
     def wrapper(*args, **kwargs):
         result = set_file_func(*args, **kwargs)
@@ -35,15 +34,15 @@ def _fix_FrameGrabber_set_file(set_file_func):
 ephyviewer.FrameGrabber.set_file = _fix_FrameGrabber_set_file(ephyviewer.FrameGrabber.set_file)
 
 def defaultKeepSignal(sig):
-    '''
+    """
 
-    '''
+    """
     return (not sig.name.startswith('Analog Input #')) and (sig.name != 'Clock')
 
 def defaultUnits(sig):
-    '''
+    """
 
-    '''
+    """
 
     mapping = {
         'V': 'uV', # convert voltages to microvolts
@@ -53,9 +52,9 @@ def defaultUnits(sig):
     return mapping.get(sig.units.dimensionality.simplified, sig.units)
 
 def defaultYLim(sig):
-    '''
+    """
 
-    '''
+    """
 
     mapping = {
         'V': [-120, 120], # plot range for voltages
@@ -65,9 +64,9 @@ def defaultYLim(sig):
     return mapping.get(sig.units.dimensionality.simplified, [-1, 1])
 
 def setDefaultsForPlots(metadata, blk):
-    '''
+    """
 
-    '''
+    """
 
     sigs = blk.segments[0].analogsignals
     signalNameToIndex = {sig.name:i for i, sig in enumerate(sigs)}
@@ -91,9 +90,9 @@ def setDefaultsForPlots(metadata, blk):
     return metadata['plots']
 
 class EphyviewerConfigurator(ipywidgets.HBox):
-    '''
+    """
 
-    '''
+    """
 
     _toggle_button_defaults = OrderedDict([
         ('traces',        {'value': True,  'icon': 'line-chart',   'description': 'Traces'}),
@@ -123,9 +122,9 @@ class EphyviewerConfigurator(ipywidgets.HBox):
     }
 
     def __init__(self, metadata, blk, rauc_sigs = None, lazy = False):
-        '''
+        """
 
-        '''
+        """
 
         self.metadata = metadata
         self.blk = blk
@@ -199,42 +198,51 @@ class EphyviewerConfigurator(ipywidgets.HBox):
                 print('your sync is accurate!')
 
     def is_enabled(self, name):
-        '''
+        """
 
-        '''
+        """
         if name in self.controls:
             return self.controls[name].value
         else:
             return False
 
     def enable(self, name):
-        '''
+        """
 
-        '''
+        """
         self.controls[name].value = True
 
     def disable(self, name):
-        '''
+        """
 
-        '''
+        """
         self.controls[name].value = False
 
     def enable_all(self):
+        """
+
+        """
         for name in self.controls:
             if not self.controls[name].disabled:
                 self.enable(name)
 
     def disable_all(self):
+        """
+
+        """
         for name in self.controls:
             self.disable(name)
 
     def _on_launch_clicked(self, button):
+        """
+
+        """
         self.launch_ephyviewer()
 
     def launch_ephyviewer(self, theme='light', support_increased_line_width=False):
-        '''
+        """
 
-        '''
+        """
 
         app = ephyviewer.mkQApp()
         win = self.create_ephyviewer_window(theme=theme, support_increased_line_width=support_increased_line_width)
@@ -242,9 +250,9 @@ class EphyviewerConfigurator(ipywidgets.HBox):
         app.exec_()
 
     def create_ephyviewer_window(self, theme='light', support_increased_line_width=False):
-        '''
+        """
 
-        '''
+        """
 
         ########################################################################
         # DATA SOURCES

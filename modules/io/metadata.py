@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
-'''
+# -*- coding: utf-8 -*-
+"""
 Import metadata about experimental data
-'''
+"""
 
 import os
 import urllib
@@ -14,9 +13,9 @@ from ..io.download import safe_download
 
 
 def abs_path(metadata, file):
-    '''
+    """
     Convert the relative path of file to an absolute path using data_dir
-    '''
+    """
     if metadata[file] is None:
         return None
     else:
@@ -24,9 +23,9 @@ def abs_path(metadata, file):
 
 
 def abs_url(metadata, file):
-    '''
+    """
     Convert the relative path of file to a full URL using remote_data_dir
-    '''
+    """
     if metadata[file] is None or metadata['remote_data_dir'] is None:
         return None
     else:
@@ -38,9 +37,9 @@ def abs_url(metadata, file):
 
 
 def is_url(url):
-    '''
+    """
     Returns True only if the parameter begins with the form <scheme>://<netloc>
-    '''
+    """
     try:
         result = urllib.parse.urlparse(url)
         return all([result.scheme, result.netloc])
@@ -49,9 +48,9 @@ def is_url(url):
 
 
 def download_file(metadata, file):
-    '''
+    """
     Download a file
-    '''
+    """
 
     if not is_url(metadata['remote_data_dir']):
         print('metadata[remote_data_dir] is not a full URL')
@@ -68,9 +67,9 @@ def download_file(metadata, file):
 
 
 def DownloadAllDataFiles(metadata):
-    '''
+    """
     Download all files associated with metadata
-    '''
+    """
 
     if not is_url(metadata['remote_data_dir']):
         print('metadata[remote_data_dir] is not a full URL')
@@ -81,9 +80,9 @@ def DownloadAllDataFiles(metadata):
 
 
 def _defaults_for_key(key):
-    '''
+    """
 
-    '''
+    """
 
     defaults = {
         # store the key with the metadata
@@ -181,7 +180,7 @@ def _defaults_for_key(key):
     return defaults
 
 def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root = None):
-    '''
+    """
     Read metadata stored in a YAML file about available collections of data,
     assign defaults to missing parameters, and resolve absolute paths for local
     data stores and full URLs for remote data stores.
@@ -213,7 +212,7 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root
     both "data_dir" and "remote_data_dir" (i.e., the local and remote data
     stores mirror one another) and can be resolved with `abs_path` or
     `abs_url`.
-    '''
+    """
 
     assert file is not None, 'metadata file must be specified'
     assert os.path.exists(file), 'metadata file "{}" cannot be found'.format(file)
@@ -287,6 +286,9 @@ def LoadMetadata(file = 'metadata.yml', local_data_root = None, remote_data_root
     return md
 
 def selector_labels(all_metadata):
+    """
+
+    """
 
     # indicate presence of local data files with symbols
     has_local_data = {}
@@ -325,7 +327,7 @@ def selector_labels(all_metadata):
 
 
 class MetadataManager():
-    '''
+    """
     A class for managing metadata.
 
     A metadata file can be specified at initialization, in which case it is
@@ -374,12 +376,12 @@ class MetadataManager():
 
     >>> print(metadata.abs_path('data_file'))
     >>> print(metadata.abs_url('data_file'))
-    '''
+    """
 
     def __init__(self, file=None, local_data_root=None, remote_data_root=None, initial_selection=None):
-        '''
+        """
         Initialize a new MetadataManager.
-        '''
+        """
 
         self.file = file
         self.local_data_root = local_data_root
@@ -393,17 +395,17 @@ class MetadataManager():
                 self.select(initial_selection)
 
     def load(self):
-        '''
+        """
         Read the metadata file.
-        '''
+        """
         self.all_metadata = LoadMetadata(self.file, self.local_data_root, self.remote_data_root)
         if self._selection not in self.all_metadata:
             self._selection = None
 
     def select(self, selection):
-        '''
+        """
         Select a metadata set.
-        '''
+        """
         if self.all_metadata is None:
             print('load metadata before selecting')
         elif selection not in self.all_metadata:
@@ -413,77 +415,77 @@ class MetadataManager():
 
     @property
     def selected_metadata(self):
-        '''
+        """
         The access point for the selected metadata set.
-        '''
+        """
         if self._selection is None:
             return None
         else:
             return self.all_metadata[self._selection]
 
     def abs_path(self, file):
-        '''
+        """
         Convert the relative path of file to an absolute path using data_dir.
-        '''
+        """
         return abs_path(self.selected_metadata, file)
 
     def abs_url(self, file):
-        '''
+        """
         Convert the relative path of file to a full URL using remote_data_dir.
-        '''
+        """
         return abs_url(self.selected_metadata, file)
 
     def download(self, file):
-        '''
+        """
         Download a file associated with the selected metadata set.
-        '''
+        """
         download_file(self.selected_metadata, file)
 
     def download_all_data_files(self):
-        '''
+        """
         Download all files associated with the selected metadata set.
-        '''
+        """
         DownloadAllDataFiles(self.selected_metadata)
 
     def __iter__(self, *args):
-        '''
+        """
         Pass-through method for using __iter__ on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.__iter__(*args)
 
     def __getitem__(self, *args):
-        '''
+        """
         Pass-through method for using __getitem__ on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.__getitem__(*args)
 
     def __setitem__(self, *args):
-        '''
+        """
         Pass-through method for using __setitem__ on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.__setitem__(*args)
 
     def __delitem__(self, *args):
-        '''
+        """
         Pass-through method for using __delitem__ on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.__delitem__(*args)
 
     def get(self, *args):
-        '''
+        """
         Pass-through method for using get() on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.get(*args)
 
     def setdefault(self, *args):
-        '''
+        """
         Pass-through method for using setdefault() on the selected metadata set.
-        '''
+        """
         return self.selected_metadata.setdefault(*args)
 
 
 class MetadataSelector(MetadataManager, ipywidgets.VBox):
-    '''
+    """
     Interactive list box for Jupyter notebooks that allows the user to select
     which metadata set they would like to work with.
 
@@ -503,12 +505,12 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
     This allows the MetadataSelector to be passed to functions expecting a
     simple dictionary corresponding to a single metadata set, and the selected
     metadata set will be used automatically.
-    '''
+    """
 
     def __init__(self, file=None, local_data_root=None, remote_data_root=None, initial_selection=None):
-        '''
+        """
         Initialize a new MetadataSelector.
-        '''
+        """
 
         # load the metadata and set the initial selection
         MetadataManager.__init__(
@@ -566,9 +568,9 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
         self.children = [self.selector, self.reload_button]
 
     def _on_select(self, change):
-        '''
+        """
         Run each time the selection changes.
-        '''
+        """
         self._selection = self.selector.value
 
         # warn if video_offset is not set
@@ -576,9 +578,9 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
             print('Warning: Video sync may be incorrect! video_offset not set for {}'.format(self._selection))
 
     def _on_reload_clicked(self, button):
-        '''
+        """
         Run each time the reload button is clicked.
-        '''
+        """
         self.load()
 
         if self.all_metadata is not None:
@@ -593,7 +595,7 @@ class MetadataSelector(MetadataManager, ipywidgets.VBox):
                 self.selector.value = old_selection
 
     def _on_download_clicked(self, button):
-        '''
+        """
         Run each time the download button is clicked.
-        '''
+        """
         self.download_all_data_files()

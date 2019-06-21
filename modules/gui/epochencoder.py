@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
 
-'''
-
-'''
+"""
 
 import os
 import shutil
@@ -11,7 +10,14 @@ import pandas as pd
 from ephyviewer import WritableEpochSource
 
 class MyWritableEpochSource(WritableEpochSource):
+    """
+
+    """
+
     def __init__(self, filename, possible_labels, color_labels=None, channel_name='', backup=True):
+        """
+
+        """
 
         self.filename = filename
         self.backup = backup
@@ -49,6 +55,10 @@ class MyWritableEpochSource(WritableEpochSource):
         return epoch
 
     def save(self):
+        """
+
+        """
+
         # if file already exists, make a backup copy first
         if self.backup and os.path.exists(self.filename):
             backup_filename = self.filename.split('.')

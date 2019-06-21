@@ -1,6 +1,7 @@
-'''
+# -*- coding: utf-8 -*-
+"""
 
-'''
+"""
 
 from ..io.ftpauth import *
 from ..io.download import *

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+
+"""
+
 import ftplib
 import urllib
 from urllib.request import FTPHandler, HTTPPasswordMgr
@@ -5,7 +10,7 @@ from urllib.parse import splitport, splituser, unquote
 
 
 class FTPBasicAuthHandler(FTPHandler):
-    '''
+    """
     This subclass of urllib.request.FTPHandler implements basic authentication
     management for FTP connections. Like HTTPBasicAuthHandler, this handler for
     FTP connections has a password manager that it checks for login credentials
@@ -22,9 +27,12 @@ class FTPBasicAuthHandler(FTPHandler):
     >>> handler.add_password(None, uri, user, passwd)  # realm must be None
     >>> opener = urllib.request.build_opener(handler)
     >>> urllib.request.install_opener(opener)
-    '''
+    """
 
     def __init__(self, password_mgr=None):
+        """
+
+        """
 
         if password_mgr is None:
             password_mgr = HTTPPasswordMgr()
@@ -33,7 +41,7 @@ class FTPBasicAuthHandler(FTPHandler):
         return super().__init__()
 
     def ftp_open(self, req):
-        '''
+        """
         When ftp requests are made using this handler, this function gets
         called at some point, and it in turn calls the connect_ftp method. In
         this subclass's reimplementation of connect_ftp, the FQDN of the
@@ -51,7 +59,7 @@ class FTPBasicAuthHandler(FTPHandler):
         original implementation should handle this (retrlen should contain the
         file size). However, for others this can fail silently due to the
         server response not matching an anticipated regular expression.
-        '''
+        """
 
         import sys
         import email
@@ -132,14 +140,14 @@ class FTPBasicAuthHandler(FTPHandler):
             raise exc.with_traceback(sys.exc_info()[2])
 
     def connect_ftp(self, user, passwd, host, port, dirs, timeout):
-        '''
+        """
         Unless authentication credentials are provided in the request URL
         (ftp://user:passwd@host/path), this method will be called with empty
         user and passwd arguments. In that case, this reimplementation of
         connect_ftp checks the password manager for credentials matching the
         last_req_host (the host argument will be an IP address instead of the
         FQDN and is thereby useless if the password manager is keyed by FQDN).
-        '''
+        """
 
         if not user and not passwd:
             user, passwd = self.passwd.find_user_password(None, self.last_req_host)
@@ -147,12 +155,12 @@ class FTPBasicAuthHandler(FTPHandler):
 
 
 def setup():
-    '''
+    """
     Install FTPBasicAuthHandler as the global default FTP handler
 
     Note that install_opener will remove all other non-default handlers
     installed in a different opener, such as an HTTPBasicAuthHandler.
-    '''
+    """
 
     handler = FTPBasicAuthHandler()
     opener = urllib.request.build_opener(handler)

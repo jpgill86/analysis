@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+
+"""
+
 import os
 import urllib
 from getpass import getpass
@@ -18,10 +23,10 @@ urllib.request.install_opener(_opener)
 
 
 def _auth_needed(url):
-    '''
+    """
     Determine whether authentication is needed by attempting to make a
     connection
-    '''
+    """
 
     # escape spaces and other unsafe characters
     url = urllib.parse.quote(url, safe='/:')
@@ -65,9 +70,9 @@ def _auth_needed(url):
 
 
 def _authenticate(url):
-    '''
+    """
     Perform HTTP or FTP authentication
-    '''
+    """
 
     # escape spaces and other unsafe characters
     url = urllib.parse.quote(url, safe='/:')
@@ -135,9 +140,9 @@ def _authenticate(url):
             handler.add_password(None, netloc, user, passwd)
 
 def _download(url, local_file, bytes_per_chunk=1024*8, show_progress=True):
-    '''
+    """
     Download after authenticating if necessary
-    '''
+    """
 
     auth_needed =  _auth_needed(url)
     if auth_needed:
@@ -168,9 +173,9 @@ def _download(url, local_file, bytes_per_chunk=1024*8, show_progress=True):
 
 
 def safe_download(url, local_file, **kwargs):
-    '''
+    """
     Download unless the file already exists locally
-    '''
+    """
     if not os.path.exists(local_file):
         print(f'Downloading {os.path.basename(local_file)}')
         _download(url, local_file, **kwargs)
