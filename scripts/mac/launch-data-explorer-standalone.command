@@ -12,4 +12,4 @@ conda activate "$CONDAENV"
 
 cd "$(dirname "$0")/../.."
 
-python -m modules
+python -m neurotic
