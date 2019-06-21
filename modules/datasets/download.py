@@ -10,7 +10,7 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from urllib.request import HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
-from ..io.ftpauth import FTPBasicAuthHandler
+from ..datasets.ftpauth import FTPBasicAuthHandler
 
 
 # install HTTP and FTP authentication handlers, the latter of which also adds

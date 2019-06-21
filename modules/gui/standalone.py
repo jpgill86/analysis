@@ -9,7 +9,7 @@ import quantities as pq
 import elephant
 from ephyviewer import QT
 
-from ..io import MetadataManager, LoadAndPrepareData, selector_labels
+from ..datasets import MetadataManager, LoadAndPrepareData, selector_labels
 from ..gui.config import EphyviewerConfigurator
 
 

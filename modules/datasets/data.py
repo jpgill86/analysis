@@ -9,7 +9,7 @@ import quantities as pq
 import elephant
 import neo
 
-from ..io.metadata import abs_path
+from ..datasets.metadata import abs_path
 from neo.test.generate_datasets import fake_neo
 
 def LoadAndPrepareData(metadata, lazy=False, signal_group_mode='split-all', fake_data_for_testing = False):

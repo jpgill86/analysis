@@ -3,7 +3,7 @@
 
 """
 
-from .io import *
+from .datasets import *
 from .gui import *
 from .scripts import *
 from .utils import *

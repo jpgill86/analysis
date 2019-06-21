@@ -12,7 +12,7 @@ import quantities as pq
 import ephyviewer
 import ipywidgets
 
-from ..io import abs_path
+from ..datasets import abs_path
 from ..utils import EstimateVideoJumpTimes, NeoEpochToDataFrame
 from ..gui.epochencoder import MyWritableEpochSource
 
