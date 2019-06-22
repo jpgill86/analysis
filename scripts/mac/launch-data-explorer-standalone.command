@@ -10,6 +10,4 @@ source $CONDAROOT/etc/profile.d/conda.sh
 
 conda activate "$CONDAENV"
 
-cd "$(dirname "$0")/../.."
-
-python -m neurotic
+neurotic

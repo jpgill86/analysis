@@ -23,9 +23,7 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-CD /D "%~dp0..\.."
-
-python -m neurotic
+neurotic
 
 IF %ERRORLEVEL% NEQ 0 (
    PAUSE
