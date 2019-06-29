@@ -26,7 +26,7 @@ or update an existing one::
     conda env update -f environment.yml -n analysis
 
 Instead of ``analysis``, you could use any environment name you like, but the
-scripts in the ``scripts`` directory assume this is your enviroment name.
+scripts in the ``scripts`` directory assume this is your environment name.
 
 .. _Anaconda:       https://www.anaconda.com/download/
 .. _Miniconda:      https://docs.conda.io/en/latest/miniconda.html
