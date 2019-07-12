@@ -10,9 +10,11 @@ dependencies:
   - nbstripout   # optional: nbstripout --install
   - notebook
   - numpy
+  - packaging
   - pandas
   - pip
   - python>=3
+  - pyqt
   - pyyaml
   - quantities
   - scikit-learn
@@ -24,7 +26,7 @@ dependencies:
     - elephant>=0.6.2
     - pylttb
     - spm1d
-    - git+https://github.com/jpgill86/python-neo.git@axographrawio
-    - git+https://github.com/jpgill86/ephyviewer.git@experimental
+    - git+https://github.com/NeuralEnsemble/python-neo.git
+    - git+https://github.com/NeuralEnsemble/ephyviewer.git
     - git+https://github.com/jpgill86/tridesclous.git@experimental
     - git+https://github.com/jpgill86/neurotic.git
