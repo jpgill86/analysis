@@ -21,6 +21,4 @@ IF EXIST C:\ProgramData\Miniconda3 (
 
 CALL "%CONDAROOT%\Scripts\activate" "%CONDAENV%"
 
-CD /D "%~dp0..\.."
-
-jupyter notebook "example\Data Explorer.ipynb"
+neurotic --launch-example-notebook
