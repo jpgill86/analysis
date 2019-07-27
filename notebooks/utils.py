@@ -7,7 +7,7 @@ import numpy as np
 import neo
 import elephant
 from pylttb import lttb
-import neurotic
+from neurotic.gui.config import _neo_epoch_to_dataframe
 
 class CausalAlphaKernel(elephant.kernels.AlphaKernel):
     """
@@ -65,7 +65,7 @@ def BehaviorsDataFrame(neo_epochs, behavior_query, subepoch_queries):
     """
 
     # filter epochs to obtain the behaviors
-    df = neurotic.NeoEpochToDataFrame(neo_epochs)
+    df = _neo_epoch_to_dataframe(neo_epochs)
     df = df.rename(columns={'Start (s)': 'Start', 'End (s)': 'End', 'Duration (s)': 'Duration'})
     df = df.query(behavior_query)
     df = df.rename(columns={'Start': 'Start (s)', 'End': 'End (s)', 'Duration': 'Duration (s)'})
@@ -79,7 +79,7 @@ def BehaviorsDataFrame(neo_epochs, behavior_query, subepoch_queries):
         df[col_prefix+' label'] = ''
 
     # for every behavior, identify other epochs that belong to it
-    df2 = neurotic.NeoEpochToDataFrame(neo_epochs)
+    df2 = _neo_epoch_to_dataframe(neo_epochs)
     df2 = df2.rename(columns={'Start (s)': 'Start', 'End (s)': 'End', 'Duration (s)': 'Duration'})
     for i in df.index:
 
