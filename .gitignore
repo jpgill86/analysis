@@ -2,6 +2,8 @@
 *.pdf
 *.png
 *.svg
+*.jpg
+*.html
 ffs-ignore/
 scratch/
 
