@@ -24,9 +24,9 @@ dependencies:
   - tqdm
   - pip:
     - elephant>=0.6.2
+    - neo>=0.8.0
     - pylttb
     - spm1d
-    - git+https://github.com/NeuralEnsemble/python-neo.git
     - git+https://github.com/NeuralEnsemble/ephyviewer.git
     - git+https://github.com/jpgill86/tridesclous.git@experimental
     - git+https://github.com/jpgill86/neurotic.git
