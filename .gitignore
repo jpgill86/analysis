@@ -4,6 +4,7 @@
 *.svg
 *.jpg
 *.html
+*.pickle
 ffs-ignore/
 scratch/
 
