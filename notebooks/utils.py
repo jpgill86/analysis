@@ -92,17 +92,37 @@ def BehaviorsDataFrame(neo_epochs, behavior_query, subepoch_queries):
         behavior_label    = df.loc[i, 'Label']
 
         for col_prefix, query in subepoch_queries.items():
-            df3 = df2.query(query)
-            if len(df3) == 0:
-                pass
-            elif len(df3) == 1:
-                matching_epoch = df3.iloc[0]
-                df.loc[i, col_prefix+' start (s)'] = matching_epoch['Start']
-                df.loc[i, col_prefix+' end (s)'] = matching_epoch['End']
-                df.loc[i, col_prefix+' duration (s)'] = matching_epoch['Duration']
-                df.loc[i, col_prefix+' type'] = matching_epoch['Type']
-                df.loc[i, col_prefix+' label'] = matching_epoch['Label']
+
+            # the query string may optionally be paired (in a tuple) with a
+            # string, either 'first' or 'last', which indicates how to handle
+            # multiple matching epochs -- if no such string is provided,
+            # multiple matches will raise an exception
+            if isinstance(query, tuple):
+                query, position = query
             else:
-                raise Exception(f'More than one epoch was found for the behavior spanning [{behavior_start}, {behavior_end}] that matches this query: {query}')
+                position = None
+
+            df3 = df2.query(query)
+
+            if len(df3) == 0:
+                # skip if there are no matches
+                continue
+            elif len(df3) == 1 or position == 'first':
+                matching_epoch = df3.iloc[0]
+            elif position == 'last':
+                matching_epoch = df3.iloc[-1]
+            else:
+                # error if there are multiple matches and a method for handling
+                # them was not explicitly specified
+                raise Exception(f'More than one epoch was found for the ' \
+                                f'behavior spanning [{behavior_start}, ' \
+                                f'{behavior_end}] that matches this query: ' \
+                                f'{query}')
+
+            df.loc[i, col_prefix+' start (s)'] = matching_epoch['Start']
+            df.loc[i, col_prefix+' end (s)'] = matching_epoch['End']
+            df.loc[i, col_prefix+' duration (s)'] = matching_epoch['Duration']
+            df.loc[i, col_prefix+' type'] = matching_epoch['Type']
+            df.loc[i, col_prefix+' label'] = matching_epoch['Label']
 
     return df
