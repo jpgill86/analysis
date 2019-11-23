@@ -2,20 +2,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - av
   - git
   - ipywidgets
   - matplotlib>=3.1
   - nbdime       # optional: nbdime extensions --enable
   - nbstripout   # optional: nbstripout --install
+  - neurotic
   - notebook
   - numpy
-  - packaging
   - pandas
   - pip
-  - python>=3
-  - pyqt
-  - pyyaml
+  - python>=3.6
+  - python-neo>=0.8.0
   - quantities
   - scikit-learn
   - scipy
@@ -24,9 +22,6 @@ dependencies:
   - tqdm
   - pip:
     - elephant>=0.6.2
-    - neo>=0.8.0
     - pylttb
     - spm1d
-    - git+https://github.com/NeuralEnsemble/ephyviewer.git
     - git+https://github.com/jpgill86/tridesclous.git@experimental
-    - git+https://github.com/jpgill86/neurotic.git
