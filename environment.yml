@@ -15,6 +15,9 @@ dependencies:
   - python>=3.6
   - python-neo>=0.8.0
   - quantities
+  - r-effsize
+  - r-rrcov
+  - rpy2==2.9.4  # newer builds for Windows are broken
   - scikit-learn
   - scipy
   - seaborn
