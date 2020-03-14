@@ -4,6 +4,9 @@
 *.svg
 *.jpg
 *.html
+*.eps
+*.xcf
+*.mat
 *.zip
 ffs-ignore/
 scratch/
