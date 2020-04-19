@@ -3,12 +3,14 @@
 Tools for working with Neo objects
 """
 
+
 import numpy as np
 import neo
 import elephant
 from pylttb import lttb
 import neurotic
 from neurotic.gui.config import _neo_epoch_to_dataframe
+
 
 class CausalAlphaKernel(neurotic._elephant_tools.CausalAlphaKernel, elephant.kernels.Kernel):
     # add elephant.kernels.Kernel as a parent class of CausalAlphaKernel so
