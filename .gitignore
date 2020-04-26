@@ -8,6 +8,7 @@
 *.xcf
 *.mat
 *.zip
+*.txt
 ffs-ignore/
 scratch/
 
